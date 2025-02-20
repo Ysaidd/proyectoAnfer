@@ -1,6 +1,7 @@
 import Carousel from "../components/Carousel";
 import Categories from "../components/Categories";
 import BtnVerTienda from "../components/BtnVerTienda";
+import Banner from "../components/Banner";
 
 const Home = () => {
     return (
@@ -8,6 +9,7 @@ const Home = () => {
             <Carousel/>
             <Categories/>
             <BtnVerTienda link="/productos"/>
+            <Banner/>   
         </div>
     );
 };

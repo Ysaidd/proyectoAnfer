@@ -3,7 +3,7 @@ import Home from "./pages/home";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Navbar from "./components/Navbar";
-import Carousel from "./components/Carousel";
+import Footer from "./components/Footer";
 
 const AppRouter = () => {
   return (
@@ -14,6 +14,8 @@ const AppRouter = () => {
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
       </Routes>
+
+    <Footer />
     
 
     </BrowserRouter>

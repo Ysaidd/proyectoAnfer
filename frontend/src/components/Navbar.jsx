@@ -4,7 +4,7 @@ const Navbar = () => {
   return (
     <nav className="bg-gradient-to-r from-blue-700 to-purple-700 p-4 text-white">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold">HANG TEN</h1>
+        <h1 className="text-2xl font-bold">Anfer</h1>
         <ul className="flex space-x-6">
           <li><Link to="/" className="hover:underline">Inicio</Link></li>
           <li><Link to="/products" className="hover:underline">Productos</Link></li>
