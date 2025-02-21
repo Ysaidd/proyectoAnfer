@@ -5,22 +5,22 @@ const Categories = () => {
     {
       title: "Caballero",
       image: "/images/prueba.jpg",
-      link: "/productos/",
+      link: "/products/",
     },
     {
       title: "Juvenil",
       image: "/images/prueba.jpg",
-      link: "/productos/",
+      link: "/products/",
     },
     {
       title: "Accesorios",
       image: "/images/prueba.jpg",
-      link: "/productos/",
+      link: "/products/",
     },
     {
         title: "Accesorios",
         image: "/images/prueba.jpg",
-        link: "/productos/",
+        link: "/products/",
       },
   ];
 
