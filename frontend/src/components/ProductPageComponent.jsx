@@ -34,6 +34,7 @@ const ProductPageComponent = () => {
   const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(product?.images[0]);
+  const [showMessage, setShowMessage] = useState(false);
 
   if (!product) return (
     <div className="max-w-6xl mx-auto p-6 h-[80vh] shadow-sm bg-white p-4">
@@ -46,7 +47,8 @@ const ProductPageComponent = () => {
 
   const handleAddToCart = () => {
     addToCart(product, quantity, selectedSize, selectedColor);
-    alert("Producto agregado al carrito");
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 3000);
   };
 
   return (
@@ -59,7 +61,9 @@ const ProductPageComponent = () => {
           ))}
         </div>
       </div>
+      
       <div>
+      {showMessage && <div className="bg-blue-400 py-4"><p className="ms-3 font-semibold text-white">Producto Agregado exitosamente</p></div>}
         <h2 className="text-3xl font-bold">{product.name}</h2>
         <p className="text-blue-500 text-2xl font-semibold">${product.price.toFixed(2)}</p>
 
