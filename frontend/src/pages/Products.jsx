@@ -1,12 +1,11 @@
 import CartList from "../components/CartList";
 import ProductList from "../components/ProductList";
+import StorePage from "../components/ShopCategories";
 
 const Products = () => {
     return (
         <div>
-            <h2 className="text-center text-2xl mt-5">Lista de Productos</h2>
-
-            <ProductList />
+            <StorePage />
         </div>
     )
 };
