@@ -1,7 +1,10 @@
 import React, {useState} from "react";
 import { Trash2 } from "lucide-react";
+import { useCart } from "../context/CartContext";
 
 const CartItem = ({ item, updateQuantity }) => {
+
+    const { removeFromCart } = useCart();
 
     const [quantity, setQuantity] = useState(item.quantity);
 
@@ -16,7 +19,7 @@ const CartItem = ({ item, updateQuantity }) => {
     return (
         <tr className="border-b text-center">
             <td>
-                <button className="text-red-500 hover:text-red-700">
+                <button className="text-red-500 hover:text-red-700" onClick={() => removeFromCart(item.id)}>
                 <Trash2 size={18} />
                 </button>
             </td>

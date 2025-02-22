@@ -6,22 +6,22 @@ const categories = [
     { name: "Caballero", count: 298 },
     { name: "Dama", count: 68 },
     { name: "Calzados", count: 67 },
-    { name: "Pantalones", count: 38 },
+    { name: "Pantalones", count: 38 }
 ];
 
 const products = [
-    { id: 1, name: "Calzado Dama Style D-7545-2", price: 30, image: "images/prueba.jpg", category: "Pantalones" },
-    { id: 2, name: "Calzado Dama Style D-7545-3", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 3, name: "Calzado Dama Style D-7545-7", price: 30, image: "images/prueba.jpg", category: "Pantalones" },
-    { id: 4, name: "Calzado Dama Style D-7545-2", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 5, name: "Calzado Dama Style D-7545-3", price: 30, image: "images/prueba.jpg", category: "Accesorios" },
-    { id: 6, name: "Calzado Dama Style D-7545-7", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 7, name: "buscar", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 8, name: "Calzado Dama Style D-7545-3", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 9, name: "Calzado Dama Style D-7545-7", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 10, name: "Calzado Dama Style D-7545-2", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 11, name: "Calzado Dama Style D-7545-3", price: 30, image: "images/prueba.jpg", category: "Dama" },
-    { id: 12, name: "Calzado Dama Style D-7545-7", price: 30, image: "images/prueba.jpg", category: "Dama" },
+    { id: 1, name: "Calzado Dama Style D-7545-2", price: 30, image: "/images/prueba.jpg", category: "Pantalones" },
+    { id: 2, name: "Calzado Dama Style D-7545-3", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 3, name: "Calzado Dama Style D-7545-7", price: 30, image: "/images/prueba.jpg", category: "Pantalones" },
+    { id: 4, name: "Calzado Dama Style D-7545-2", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 5, name: "Calzado Dama Style D-7545-3", price: 30, image: "/images/prueba.jpg", category: "Accesorios" },
+    { id: 6, name: "Calzado Dama Style D-7545-7", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 7, name: "buscar", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 8, name: "Calzado Dama Style D-7545-3", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 9, name: "Calzado Dama Style D-7545-7", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 10, name: "Calzado Dama Style D-7545-2", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 11, name: "Calzado Dama Style D-7545-3", price: 30, image: "/images/prueba.jpg", category: "Dama" },
+    { id: 12, name: "Calzado Dama Style D-7545-7", price: 30, image: "/images/prueba.jpg", category: "Dama" },
 ];
 
 const ITEMS_PER_PAGE = 6;
@@ -67,15 +67,25 @@ const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_
         </ul>
       </aside>
       <main className="w-4/5 p-4">
-        <div className="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="border p-2 w-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <input
+          type="text"
+          placeholder="Buscar..."
+          className="border p-2 w-4/5"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button
+          className="ml-2 px-4 py-2 w-1/5 rounded bg-indigo-600 text-white hover:bg-indigo-900 transition"
+          onClick={() => {
+            setSelectedCategory(null);
+            setSearchTerm("");
+          }}
+        >
+          Resetear filtros
+        </button>
+      </div>
+
         <ProductList products={paginatedProducts} />
         <div className="flex justify-center mt-4">
           <button

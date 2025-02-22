@@ -47,7 +47,7 @@ const Footer = () => {
       </div>
 
       <div className="border-t border-gray-700 mt-6 pt-4 text-center text-white text-sm">
-        &copy; {new Date().getFullYear()} Hang Ten - Todos los derechos reservados.
+        &copy; {new Date().getFullYear()} Anfer - Todos los derechos reservados.
       </div>
     </footer>
   );

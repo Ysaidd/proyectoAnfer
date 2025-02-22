@@ -15,11 +15,13 @@ const Banner = () => {
         <p className="text-lg mb-6">
           Encuentra los mejores estilos y precios en nuestra tienda.
         </p>
-        <Link to="/contacto">
-          <button className="bg-indigo-900 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-600 transition duration-3000">
-            Comunícate con nosotros
-          </button>
-        </Link>
+        
+        <div className="cursor-pointer bg-indigo-900 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-600 transition duration-3000 ">
+          <a href="https://wa.me/584247347724" target="_blank">     
+          Comunícate con nosotros
+          </a>
+        </div>
+
       </div>
     </div>
   );
