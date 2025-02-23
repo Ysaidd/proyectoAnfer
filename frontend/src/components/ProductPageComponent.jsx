@@ -52,7 +52,7 @@ const ProductPageComponent = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 h-[75vh]">
       <div>
         <img src={currentImage} alt={product.name} className="w-full h-96 object-cover mx-auto" />
         <div className="flex gap-2 mt-4">
@@ -82,6 +82,13 @@ const ProductPageComponent = () => {
             {product.colors.map((color, index) => (
               <button key={index} className={`w-10 h-10 rounded-full border-2 ${selectedColor.hex === color.hex ? "border-blue-500" : "border-gray-300"}`} style={{ backgroundColor: color.hex }} onClick={() => setSelectedColor(color)} />
             ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <span className="font-semibold">Descripcion</span>
+          <div className="flex gap-2 mt-2">
+            <p>{product.description}</p>
           </div>
         </div>
 
