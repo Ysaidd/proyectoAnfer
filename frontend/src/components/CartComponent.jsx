@@ -9,7 +9,7 @@ const CartComponent = () => {
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 h-[80vh]">
+    <div className="max-w-4xl mx-auto p-6 min-h-[80vh]">
       <CartList cartItems={cartItems} updateQuantity={updateQuantity} />
       <CartSummary total={total} cartItems={cartItems} />
     </div>
