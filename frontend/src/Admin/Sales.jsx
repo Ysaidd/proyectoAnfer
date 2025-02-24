@@ -1,13 +1,16 @@
 import { useState } from "react";
+import CreateSale from "./CreateSale";
 
 const Sales = () => {
   const [sales, setSales] = useState([
-    { id: 1, name: "camisa", price: 1200, quantity: 2, color: "Gris", size: "S" },
-    { id: 2, name: "pantalon", price: 800, quantity: 3, color: "Negro", size: "M" },
-    { id: 3, name: "Short", price: 150, quantity: 5, color: "Blanco", size: "L" },
+    { id: 1, name: "Laptop", price: 1200, quantity: 2, color: "Gris", size: "15 pulgadas" },
+    { id: 2, name: "Smartphone", price: 800, quantity: 3, color: "Negro", size: "6.5 pulgadas" },
   ]);
 
-  // Calcular el total de todas las ventas
+  const addSale = (newSale) => {
+    setSales([...sales, newSale]);
+  };
+
   const total = sales.reduce((sum, sale) => sum + sale.price * sale.quantity, 0);
 
   return (
@@ -15,8 +18,10 @@ const Sales = () => {
       <h1 className="text-2xl font-bold mb-2">💰 Ventas</h1>
       <p className="text-gray-600 mb-4">Listado de productos vendidos y su información.</p>
 
+      <CreateSale onAddSale={addSale} />
+
       {/* Tabla de ventas */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mt-6">
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
