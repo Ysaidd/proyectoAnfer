@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import AdminPrincipal from "../pages/AdminPrincipal";
 import AdminProducts from "../pages/AdminProducts";
 import AdminUsers from "../pages/AdminUsers";
+import AdminSales from "../pages/AdminSales";
 
 const AppRouter = () => {
     return (
@@ -38,6 +39,7 @@ const AppRouter = () => {
                     <Route path="/" element={<AdminPrincipal/>} />
                     <Route path="/products" element={<AdminProducts/>} />
                     <Route path="/users" element={<AdminUsers/>} />
+                    <Route path="/sales" element={<AdminSales/>}></Route>
                     </Routes>
                 </>
                 }

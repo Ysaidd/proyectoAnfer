@@ -20,6 +20,11 @@ const AdminSidebar = () => {
             👥 Usuarios
           </Link>
         </li>
+        <li>
+          <Link to={`/admin/sales`} className="block p-2 hover:bg-gray-700 rounded">
+            💰 Ventas
+          </Link>
+        </li>
       </ul>
     </aside>
   );
