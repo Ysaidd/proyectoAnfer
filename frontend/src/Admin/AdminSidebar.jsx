@@ -21,6 +21,11 @@ const AdminSidebar = () => {
           </Link>
         </li>
         <li>
+          <Link to={`/admin/createSales`} className="block p-2 hover:bg-gray-700 rounded">
+            💰 Crear Venta
+          </Link>
+        </li>
+        <li>
           <Link to={`/admin/sales`} className="block p-2 hover:bg-gray-700 rounded">
             💰 Ventas
           </Link>

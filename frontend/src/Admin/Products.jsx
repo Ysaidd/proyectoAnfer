@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductForm from "./ProductForm";
 
 const Products = () => {
-  const [products, setProducts] = useState([
-    { id: 1, name: "Laptop", price: 1200, stock: 15, image: "https://via.placeholder.com/100" },
-    { id: 2, name: "Smartphone", price: 800, stock: 25, image: "https://via.placeholder.com/100" },
-    { id: 3, name: "Auriculares", price: 150, stock: 50, image: "https://via.placeholder.com/100" },
-  ]);
-
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/products") // Ajusta la URL según tu backend
+      .then((response) => response.json())
+      .then((data) => setProducts(data))
+      .catch((error) => console.error("Error cargando productos:", error));
+  }, []);
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(search.toLowerCase())
@@ -32,41 +34,43 @@ const Products = () => {
 
       {/* Tabla de productos */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300">
+      <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-300 p-2">Imagen</th>
               <th className="border border-gray-300 p-2">Nombre</th>
-              <th className="border border-gray-300 p-2">Precio</th>
+              <th className="border border-gray-300 p-2">Descripción</th>
+              <th className="border border-gray-300 p-2">Categoría</th>
+              <th className="border border-gray-300 p-2">Talla</th>
+              <th className="border border-gray-300 p-2">Color</th>
               <th className="border border-gray-300 p-2">Stock</th>
               <th className="border border-gray-300 p-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
-              <tr key={product.id} className="text-center hover:bg-gray-50">
-                <td className="border border-gray-300 p-2">
-                  <img src={product.image} alt={product.name} className="w-12 h-12 mx-auto rounded-md" />
-                </td>
-                <td className="border border-gray-300 p-2">{product.name}</td>
-                <td className="border border-gray-300 p-2">${product.price}</td>
-                <td className="border border-gray-300 p-2">{product.stock}</td>
-                <td className="border border-gray-300 p-2 flex justify-center gap-2">
-                  <button
-                    className="bg-yellow-400 px-3 py-1 text-white rounded-md"
-                    onClick={() => {
-                      setSelectedProduct(product);
-                      setIsFormOpen(true);
-                    }}
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button className="bg-red-500 px-3 py-1 text-white rounded-md">
-                    🗑️ Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {filteredProducts.map((product) =>
+              product.variants.map((variant, index) => (
+                <tr key={`${product.id}-${variant.id}`} className="text-center hover:bg-gray-50">
+                  {index === 0 && (
+                    <>
+                      <td rowSpan={product.variants.length} className="border border-gray-300 p-2">
+                        <img src={product.image || "https://via.placeholder.com/100"} alt={product.name} className="w-12 h-12 mx-auto rounded-md" />
+                      </td>
+                      <td rowSpan={product.variants.length} className="border border-gray-300 p-2">{product.name}</td>
+                      <td rowSpan={product.variants.length} className="border border-gray-300 p-2">{product.description}</td>
+                      <td rowSpan={product.variants.length} className="border border-gray-300 p-2">{product.category?.name || "Sin categoría"}</td>
+                    </>
+                  )}
+                  <td className="border border-gray-300 p-2">{variant.size}</td>
+                  <td className="border border-gray-300 p-2">{variant.color}</td>
+                  <td className="border border-gray-300 p-2">{variant.stock}</td>
+                  <td className="border border-gray-300 p-2 flex justify-center gap-2">
+                    <button className="bg-yellow-400 px-3 py-1 text-white rounded-md">✏️ Editar</button>
+                    <button className="bg-red-500 px-3 py-1 text-white rounded-md">🗑️ Eliminar</button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
