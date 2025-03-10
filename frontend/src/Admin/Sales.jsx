@@ -46,7 +46,7 @@ const Sales = () => {
                 <td className="border border-gray-300 p-2">{formatDate(sale.created_at)}</td>
                 <td className="border border-gray-300 p-2 text-left">
                   <ul className="list-disc pl-5">
-                    {sale.items.map((item, index) => (
+                    {sale.items?.map((item, index) => (
                       <li key={index}>
                         <strong>{item.product_name}</strong> ({item.size}, {item.color})  
                         <br />

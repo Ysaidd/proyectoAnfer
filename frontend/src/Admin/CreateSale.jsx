@@ -2,22 +2,21 @@ import { useState, useEffect } from "react";
 
 const CreateSale = ({ onAddSale }) => {
   const [customerPhone, setCustomerPhone] = useState("");
-  const [products, setProducts] = useState([]); // Productos desde la API
-  const [search, setSearch] = useState(""); // Búsqueda en tiempo real
-  const [filteredProducts, setFilteredProducts] = useState([]); // Productos filtrados
-  const [selectedItems, setSelectedItems] = useState([]); // Productos en la venta
-  const [selectedProduct, setSelectedProduct] = useState(null); // Producto seleccionado
-  const [selectedVariant, setSelectedVariant] = useState(null); // Variante seleccionada
+  const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/products") // Cargar productos desde la API
+    fetch("http://localhost:8000/products")
       .then((response) => response.json())
       .then((data) => setProducts(data))
       .catch((error) => console.error("Error cargando productos:", error));
   }, []);
 
   useEffect(() => {
-    // Filtrar productos en tiempo real
     if (search) {
       setFilteredProducts(
         products.filter((product) =>
@@ -31,14 +30,29 @@ const CreateSale = ({ onAddSale }) => {
 
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    setSearch(""); // Limpiar la búsqueda
-    setFilteredProducts([]); // Ocultar lista
+    setSearch("");
+    setFilteredProducts([]);
 
-    // Si el producto tiene solo una variante, seleccionarla automáticamente
-    if (product.variants.length === 1) {
+    if (!product.variants || product.variants.length === 0) {
+      // 🔹 Si el producto NO tiene variantes, se añade automáticamente
+      setSelectedItems((prevItems) => [
+        ...prevItems,
+        {
+          variant_id: null,
+          name: product.name,
+          size: "N/A",
+          color: "N/A",
+          quantity: 1,
+          stock: 1,
+          price: product.price,
+        },
+      ]);
+      setSelectedProduct(null);
+    } else if (product.variants.length === 1) {
+      // 🔹 Si el producto tiene solo una variante, seleccionarla automáticamente
       setSelectedVariant(product.variants[0]);
     } else {
-      setSelectedVariant(null); // Resetear variante si hay más de una
+      setSelectedVariant(null);
     }
   };
 
@@ -48,22 +62,24 @@ const CreateSale = ({ onAddSale }) => {
   };
 
   const handleAddProduct = () => {
-    if (!selectedProduct || !selectedVariant) {
+    if (!selectedProduct) return;
+
+    if (selectedProduct.variants.length > 1 && !selectedVariant) {
       alert("Seleccione una variante antes de agregar el producto.");
       return;
     }
 
     const newItem = {
-      variant_id: selectedVariant.id,
+      variant_id: selectedVariant ? selectedVariant.id : null,
       name: selectedProduct.name,
-      size: selectedVariant.size,
-      color: selectedVariant.color,
+      size: selectedVariant ? selectedVariant.size : "N/A",
+      color: selectedVariant ? selectedVariant.color : "N/A",
       quantity: 1,
-      stock: selectedVariant.stock,
-      price: selectedProduct.price, // Añadir precio del producto
+      stock: selectedVariant ? selectedVariant.stock : 1,
+      price: selectedProduct.price,
     };
 
-    setSelectedItems([...selectedItems, newItem]);
+    setSelectedItems((prevItems) => [...prevItems, newItem]);
     setSelectedProduct(null);
     setSelectedVariant(null);
   };
@@ -78,7 +94,7 @@ const CreateSale = ({ onAddSale }) => {
     setSelectedItems(selectedItems.filter((_, i) => i !== index));
   };
 
-  const total = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0); // Calcular total
+  const total = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,27 +155,21 @@ const CreateSale = ({ onAddSale }) => {
 
       {/* Lista de productos filtrados */}
       {filteredProducts.length > 0 && (
-        <ul className="bg-white border rounded shadow-md mt-2 max-h-40 overflow-y-auto">
+        <ul className="bg-white border rounded shadow-md mt-2 max-h-60 overflow-y-auto">
           {filteredProducts.map((product) => (
             <li
               key={product.id}
               onClick={() => handleSelectProduct(product)}
-              className="p-2 hover:bg-gray-200 cursor-pointer"
+              className="p-3 border-b hover:bg-gray-200 cursor-pointer"
             >
-              {product.name} - ${product.price} - {product.description}
+              <strong>{product.name}</strong> - ${product.price}
+              <p className="text-sm text-gray-600">{product.description}</p>
             </li>
           ))}
         </ul>
       )}
 
-      {/* Mostrar precio del producto */}
-      {selectedProduct && (
-        <p className="text-lg font-semibold text-gray-800">
-          Precio: ${selectedProduct.price}
-        </p>
-      )}
-
-      {/* Selección de variantes (Solo si hay más de una) */}
+      {/* Selección de variantes */}
       {selectedProduct && selectedProduct.variants.length > 1 && (
         <div className="mt-3">
           <label className="block text-gray-700">Seleccionar Variante:</label>
@@ -170,7 +180,7 @@ const CreateSale = ({ onAddSale }) => {
             <option value="">Selecciona una variante</option>
             {selectedProduct.variants.map((variant) => (
               <option key={variant.id} value={variant.id}>
-                {variant.size} - {variant.color} (Stock: {variant.stock} )
+                {variant.size} - {variant.color} (Stock: {variant.stock})
               </option>
             ))}
           </select>
@@ -222,10 +232,7 @@ const CreateSale = ({ onAddSale }) => {
       <h3 className="text-xl font-bold mt-4">Total: ${total.toFixed(2)}</h3>
 
       {/* Botón de Confirmar Venta */}
-      <button
-        onClick={handleSubmit}
-        className="w-full bg-blue-600 text-white py-2 rounded mt-4 hover:bg-blue-700"
-      >
+      <button onClick={handleSubmit} className="w-full bg-blue-600 text-white py-2 rounded mt-4 hover:bg-blue-700">
         ✅ Confirmar Venta
       </button>
     </div>
