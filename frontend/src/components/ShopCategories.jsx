@@ -51,8 +51,8 @@ const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
-    <div className="flex max-w-6xl mx-auto">
-      <aside className="w-1/5 p-4 border-r">
+    <div className="flex max-w-6xl mx-auto min-h-[70vh] ">
+      <aside className="w-3/8 p-4 border-r">
         <h2 className="text-xl font-bold mb-4">Categorías</h2>
         <ul>
           {categories.map((cat) => (
@@ -66,17 +66,17 @@ const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_
           ))}
         </ul>
       </aside>
-      <main className="w-4/5 p-4">
-      <div className="flex justify-between items-center mb-4">
+      <main className="w-5/5 p-4" >
+      <div className="flex justify-between items-center mb-4 p-4">
         <input
           type="text"
           placeholder="Buscar..."
-          className="border p-2 w-4/5"
+          className="border p-2 w-3/5"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button
-          className="ml-2 px-4 py-2 w-1/5 rounded bg-indigo-600 text-white hover:bg-indigo-900 transition"
+          className="ml-2 px-4 py-2 w-2/5 rounded bg-indigo-600 text-white hover:bg-indigo-900 transition"
           onClick={() => {
             setSelectedCategory(null);
             setSearchTerm("");

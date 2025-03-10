@@ -4,7 +4,7 @@ import CartItem from "./CartItem";
 const CartList = ({ cartItems, updateQuantity }) => {
     
     return (
-        <div className="bg-white shadow-md rounded-lg p-5">
+        <div className="bg-white shadow-md rounded-lg p-5 overflow-x-auto">
             <h2 className="text-2xl font-bold mb-4">Carrito</h2>
             <table className="w-full border-collapse">
                 <thead>

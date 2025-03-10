@@ -9,6 +9,7 @@ import AdminPrincipal from "../pages/AdminPrincipal";
 import AdminProducts from "../pages/AdminProducts";
 import AdminUsers from "../pages/AdminUsers";
 import AdminSales from "../pages/AdminSales";
+import Error404 from "../pages/NotFounded";
 
 const AppRouter = () => {
     return (
@@ -24,6 +25,7 @@ const AppRouter = () => {
                     <Route path="/products" element={<Products />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/product/:productId" element={<ProductPage />} />
+                    <Route path="*" element={<Error404/>} />
                     </Routes>
                     <Footer />
                 </>

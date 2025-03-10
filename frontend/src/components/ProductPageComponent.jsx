@@ -52,7 +52,7 @@ const ProductPageComponent = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 h-[75vh]">
+    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[75vh]">
       <div>
         <img src={currentImage} alt={product.name} className="w-full h-96 object-cover mx-auto" />
         <div className="flex gap-2 mt-4">

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const AdminSidebar = () => {
   return (
-    <aside className="w-full bg-gray-900 text-white min-h-screen p-5">
+    <aside className="w-full bg-gray-900 text-white min-h-screen h-full p-5">
       <h2 className="text-xl font-bold mb-6">Panel de Administración</h2>
       <ul className="space-y-4">
         <li>
@@ -18,11 +18,6 @@ const AdminSidebar = () => {
         <li>
           <Link to="/admin/users" className="block p-2 hover:bg-gray-700 rounded">
             👥 Usuarios
-          </Link>
-        </li>
-        <li>
-          <Link to={`/admin/createSales`} className="block p-2 hover:bg-gray-700 rounded">
-            💰 Crear Venta
           </Link>
         </li>
         <li>
