@@ -8,6 +8,7 @@ const ProductForm = ({ product, onClose }) => {
       price: 0,
       category_id: "",
       variants: [],
+      image: null,
     }
   );
 
@@ -51,6 +52,10 @@ const ProductForm = ({ product, onClose }) => {
     setVariant({ ...variant, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
+
   const addVariant = () => {
     if (!variant.size || !variant.color || !variant.stock) {
       alert("Completa todos los campos de la variante.");
@@ -62,28 +67,28 @@ const ProductForm = ({ product, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.category_id) {
-      alert("Selecciona una categoría.");
-      return;
-    }
+    
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("description", formData.description);
+    data.append("price", formData.price);
+    data.append("category_id", formData.category_id);
+    data.append("variants", JSON.stringify(formData.variants)); // Convertir variantes a JSON string
+    data.append("image", formData.image);
 
     try {
       const response = await fetch("http://localhost:8000/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: data,
       });
 
-      if (!response.ok) throw new Error("Error al guardar el producto");
+      if (!response.ok) throw new Error("Error al crear el producto");
 
-      alert("✅ Producto guardado con éxito.");
+      alert("✅ Producto creado correctamente.");
       onClose();
     } catch (error) {
       console.error("Error:", error);
-      alert("❌ No se pudo guardar el producto.");
+      alert("❌ No se pudo crear el producto.");
     }
   };
 
@@ -144,6 +149,10 @@ const ProductForm = ({ product, onClose }) => {
             ))}
           </ul>
         )}
+
+          <label className="block text-gray-700">Imagen</label>
+          <input type="file" onChange={handleImageChange} className="w-full p-2 border mb-3" />
+
 
         {/* Agregar variantes */}
         <h3 className="text-lg font-bold mt-4">Variantes</h3>

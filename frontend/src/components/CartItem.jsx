@@ -1,43 +1,65 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 
-const CartItem = ({ item, updateQuantity }) => {
+const CartItem = ({ item }) => {
+  const { removeFromCart, updateQuantity } = useCart();
+  const [quantity, setQuantity] = useState(item.quantity);
 
-    const { removeFromCart } = useCart();
+  const handleQuantityChange = (e) => {
+    let newQuantity = Math.max(1, parseInt(e.target.value));
+    setQuantity(newQuantity);
+    updateQuantity(item.id, newQuantity);
+  };
 
-    const [quantity, setQuantity] = useState(item.quantity);
+  console.log("Imagen del producto:", item.image);
+  return (
+    <tr className="border-b text-center">
+      {/* ❌ Botón para eliminar */}
+      <td>
+        <button
+          className="text-red-500 hover:text-red-700"
+          onClick={() => removeFromCart(item.id)}
+        >
+          <Trash2 size={18} />
+        </button>
+      </td>
 
-    const handleQuantityChange = (e) =>{
-        let newQuantity = parseInt(e.target.value);
-        
-        if (newQuantity < 1) newQuantity = 1; 
-        setQuantity(newQuantity);
-        updateQuantity(item.id, newQuantity);
-    }
+      {/* 🖼️ Imagen + Nombre del producto */}
+      <td className="flex items-center space-x-3 py-3">
+        <img
+          src={`http://localhost:8000/${item.image}`} // ✅ Asegúrate de que `item.image` contiene la URL correcta
+          alt={item.name}
+          className="w-16 h-16 object-cover"
+        />
+        <div>
+          <p className="text-blue-600 font-semibold">{item.name}</p>
+          <p className="text-sm text-gray-500">
+            <strong>Talla:</strong> {item.size} | <strong>Color:</strong> {item.color.name}
+          </p>
+        </div>
+      </td>
 
-    return (
-        <tr className="border-b text-center">
-            <td>
-                <button className="text-red-500 hover:text-red-700" onClick={() => removeFromCart(item.id)}>
-                <Trash2 size={18} />
-                </button>
-            </td>
-            <td className="flex items-center space-x-3 py-3">
-                <img src={item.image} alt={item.name} className="w-12 h-12 object-contain" />
-                <span className="text-blue-600 hover:underline cursor-pointer">{item.name}</span>
-            </td>
-            <td className="text-gray-700">${item.price.toFixed(2)}</td>
-            <td>
-                <input 
-                type="number" 
-                className="w-12 border rounded text-center" 
-                value={quantity}   
-                min="1" onChange={handleQuantityChange}/>
-            </td>
-            <td className="text-gray-700 font-semibold">${(item.price * quantity).toFixed(2)}</td>
-        </tr>
-    );
+      {/* 💲 Precio unitario */}
+      <td className="text-gray-700">${item.price.toFixed(2)}</td>
+
+      {/* 🔄 Modificar cantidad */}
+      <td>
+        <input
+          type="number"
+          className="w-16 border rounded text-center"
+          value={quantity}
+          min="1"
+          onChange={handleQuantityChange}
+        />
+      </td>
+
+      {/* 🛒 Subtotal */}
+      <td className="text-gray-700 font-semibold">
+        ${(item.price * quantity).toFixed(2)}
+      </td>
+    </tr>
+  );
 };
 
 export default CartItem;

@@ -119,3 +119,8 @@ def get_orders(db: Session, skip: int = 0, limit: int = 100):
         )
         for order in orders
     ]
+
+def get_order_by_id(db: Session, order_id: int):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    print("🛠 Buscando orden:", order)  # 👀 Agregar esta línea
+    return order

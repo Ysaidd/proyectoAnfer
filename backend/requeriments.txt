@@ -7,3 +7,4 @@ passlib                    # Hashing de contraseñas
 python-dotenv              # Variables de entorno
 psycopg2-binary            # Driver PostgreSQL
 pydantic-settings>=2.0.3
+python-multipart

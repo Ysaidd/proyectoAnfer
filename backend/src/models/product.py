@@ -19,6 +19,7 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey("categories.id"))  # Clave foránea
     category = relationship("Category", back_populates="products")  # Relación inversa
     variants = relationship("ProductVariant", back_populates="product", lazy="selectin")  # Relación con variantes
+    image_url = Column(String, nullable=True)  # Nuevo campo para la imagen
 
 class ProductVariant(Base):
     __tablename__ = "product_variants"

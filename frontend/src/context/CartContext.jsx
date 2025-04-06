@@ -2,49 +2,63 @@ import { createContext, useState, useContext } from "react";
 
 const CartContext = createContext();
 
-// Hook personalizado para acceder al contexto
 export const useCart = () => useContext(CartContext);
 
-export const CartProvider = ({ children }) => {
+export const CartProvider = ({ children, initialProducts }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [products, setProducts] = useState(initialProducts || []); // ✅ Productos de la BD
+  const [confirmation, setConfirmation] = useState(null);
 
-  // 🛒 Añadir producto al carrito
-  const addToCart = (product, quantity, selectedSize, selectedColor) => {
+  const addToCart = (product, quantity, variantId) => {
+    // Buscar la variante completa
+    const variant = product.variants.find((v) => v.id === variantId);
+    
+    if (!product || !variant) {
+      console.error("Error: Producto o variante inválida");
+      return;
+    }
+  
     const newItem = {
-      id: `${product.id}-${selectedSize}-${selectedColor.name}`, // ID único
+      id: variant.id,  // Usar el variant_id como identificador único
+      variant_id: variant.id,  // Campo necesario para el endpoint
+      product_id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0],
+      image: product.image_url,
       quantity,
-      size: selectedSize,
-      color: selectedColor,
+      size: variant.size,
+      color: variant.color,
     };
-
+  
     setCartItems((prev) => {
       const exists = prev.find((item) => item.id === newItem.id);
       return exists
         ? prev.map((item) =>
-            item.id === newItem.id ? { ...item, quantity: item.quantity + quantity } : item
+            item.id === newItem.id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
           )
         : [...prev, newItem];
     });
   };
-
-  // ❌ Eliminar producto del carrito
-  const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // 🔄 Actualizar cantidad
-  const updateQuantity = (id, newQuantity) => {
-    setCartItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item))
-    );
+  
+  const clearCart = () => {
+    setCartItems([]);
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider 
+      value={{ 
+        cartItems, 
+        addToCart, 
+        clearCart, // ✅ Añadir esta función
+        confirmation, 
+        products, 
+        setProducts 
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
+ 
 };

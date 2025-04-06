@@ -1,43 +1,32 @@
+import { useState, useEffect } from "react";
 import Carousel from "../components/Carousel";
 import Categories from "../components/Categories";
 import BtnVerTienda from "../components/BtnVerTienda";
 import Banner from "../components/Banner";
 import ProductList from "../components/ProductList";
 
-
-const products = [
-    {
-      id: 1,
-      name: "Calzado Dama Style D-7545-2AAAAA",
-      price: 30.0,
-      image: "/images/prueba.jpg",
-    },
-    {
-      id: 2,
-      name: "Calzado Dama Style D-7545-3",
-      price: 30.0,
-      image: "/images/prueba.jpg",
-    },
-    {
-      id: 3,
-      name: "Calzado Dama Style D-7545-7",
-      price: 30.0,
-      image: "/images/prueba.jpg",
-    },
-  ];
-  
 const Home = () => {
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        // 🔥 Llamar a la API para obtener 3 productos
+        fetch("http://localhost:8000/products?limit=3")  
+            .then((response) => response.json())
+            .then((data) => {
+                setProducts(data);  // Guardar los productos en el estado
+            })
+            .catch((error) => console.error("Error al obtener productos:", error));
+    }, []);
+
     return (
         <div className="text-center">
-            <Carousel/>
-            <Categories/>
+            <Carousel />
+            <Categories />
             <ProductList products={products} />
-            <BtnVerTienda link="/productos"/>
-            <Banner/>   
+            <BtnVerTienda link="/productos" />
+            <Banner />
         </div>
     );
 };
 
 export default Home;
-
-

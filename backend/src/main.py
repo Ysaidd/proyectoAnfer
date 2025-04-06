@@ -2,11 +2,20 @@ from fastapi import FastAPI
 from src.db.base import Base, engine
 from src.controllers import product_controller, category_controllers, order_controllers
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 # Crear tablas en la base de datos (esto es temporal, luego usaremos Alembic)
 Base.metadata.create_all(bind=engine)
 
+UPLOAD_FOLDER = "uploads"
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+    
 app = FastAPI()
+
+app.mount("/uploads", StaticFiles(directory=UPLOAD_FOLDER), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
