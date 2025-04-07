@@ -27,7 +27,7 @@ const AdminSidebar = () => {
         </li>
         <li>
           <Link to={`/admin/categories`} className="block p-2 hover:bg-gray-700 rounded">
-            💰 Ventas
+            💰 Categorias
           </Link>
         </li>
       </ul>

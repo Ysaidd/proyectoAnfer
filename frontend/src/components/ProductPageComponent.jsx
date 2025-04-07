@@ -139,7 +139,6 @@ const ProductPageComponent = () => {
           )}
         </div>
 
-          <BtnViaWhatsapp whatsappLink={`https://wa.me/1234567890?text=${encodeURIComponent(`Hola, quiero comprar: ${product.name} - Precio: $${product.price} - Talla: ${selectedSize} - Color: ${selectedColor.name}`)}`} />
         </div>
       </div>
     </div>
