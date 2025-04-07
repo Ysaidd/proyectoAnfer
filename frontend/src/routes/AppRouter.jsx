@@ -10,6 +10,7 @@ import AdminProducts from "../pages/AdminProducts";
 import AdminUsers from "../pages/AdminUsers";
 import AdminSales from "../pages/AdminSales";
 import Error404 from "../pages/NotFounded"; 
+import CategoryManagerr from "../pages/AdminCategories";
 
 const AppRouter = () => {
     return (
@@ -42,6 +43,7 @@ const AppRouter = () => {
                     <Route path="/products" element={<AdminProducts/>} />
                     <Route path="/users" element={<AdminUsers/>} />
                     <Route path="/sales" element={<AdminSales/>}></Route>
+                    <Route path="/categories" element={<CategoryManagerr/>}></Route>
                     </Routes>
                 </>
                 }
