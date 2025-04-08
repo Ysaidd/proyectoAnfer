@@ -14,42 +14,38 @@ import CategoryManagerr from "../pages/AdminCategories";
 
 const AppRouter = () => {
     return (
-        <Routes>
-        {/* Rutas con Navbar y Footer */}
-            <Route
-                path="/*"
-                element={
-                <>
-                    <Navbar />
-                    <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/product/:productId" element={<ProductPage />} />
-                    <Route path="*" element={<Error404/>} />
-                    </Routes>
-                    <Footer />
-                </>
-                }
-            />
-
-            {/* Rutas de admin SIN Navbar ni Footer */}
-            <Route 
-                path="/admin/*" 
-                element={
-                <>
-                    <Routes>
-                    <Route path="/" element={<AdminPrincipal/>} />
-                    <Route path="/products" element={<AdminProducts/>} />
-                    <Route path="/users" element={<AdminUsers/>} />
-                    <Route path="/sales" element={<AdminSales/>}></Route>
-                    <Route path="/categories" element={<CategoryManagerr/>}></Route>
-                    </Routes>
-                </>
-                }
-                />
-        </Routes>
+      <Routes>
+        {/* Ruta principal CON Navbar/Footer */}
+        <Route
+          path="/"
+          element={
+            <>
+              <Navbar />
+              <Outlet /> {/* Aquí se renderizarán las subrutas */}
+              <Footer />
+            </>
+          }
+        >
+          <Route index element={<Home />} />
+          <Route path="products" element={<Products />} />
+          <Route path="cart" element={<Cart />} />
+          <Route path="product/:productId" element={<ProductPage />} />
+        </Route>
+  
+        {/* Ruta de Admin SIN Navbar/Footer */}
+        <Route
+          path="/admin"
+          element={<Outlet />} // Contenedor para subrutas de admin
+        >
+          <Route index element={<AdminPrincipal />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="sales" element={<AdminSales />} />
+          <Route path="categories" element={<CategoryManagerr />} />
+        </Route>
+  
+        {/* Ruta 404 debe estar FUERA de las demás rutas */}
+        <Route path="*" element={<Error404 />} />
+      </Routes>
     );
-};
-
-export default AppRouter;
+  };
