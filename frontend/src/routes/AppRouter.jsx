@@ -48,6 +48,7 @@ const AppRouter = () => {
                 </>
                 }
                 />
+        }
         </Routes>
     );
 };
