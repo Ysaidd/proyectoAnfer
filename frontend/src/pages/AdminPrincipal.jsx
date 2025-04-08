@@ -1,4 +1,4 @@
-import AdminSidebar from "../admin/AdminSidebar";
+import AdminSidebar from "../Admin/AdminSidebar";
 import Dashboard from "../Admin/Dashboard";
 
 const AdminPrincipal = () => {
