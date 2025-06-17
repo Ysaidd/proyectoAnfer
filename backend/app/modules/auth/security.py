@@ -40,6 +40,8 @@ def decode_access_token(token: str) -> dict[str, Any]:
     Decodifica y valida un token JWT.
     Retorna los claims del token si es válido, si no, levanta JWTError.
     """
+
+    print(f"DEBUG: Token recibido por decode_access_token: '{token}' AAAAAAAAAAAAAAAAAAA") # <--- AÑADE ESTA LÍNEA CLAVE
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         # Aseguramos que 'sub' (email) y 'role' estén presentes y sean válidos
@@ -55,6 +57,7 @@ def decode_access_token(token: str) -> dict[str, Any]:
         except ValueError:
             raise JWTError("Invalid token payload: invalid role value")
 
-        return {"email": email, "role": role}
+        return {"sub": email, "role": role.value}
     except JWTError as e:
+        print(f"DEBUG: JWTError atrapado al decodificar: {e}") # <--- (Opcional)
         raise e # Re-lanzar la excepción para que sea manejada por el que llama

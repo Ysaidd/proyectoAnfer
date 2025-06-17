@@ -30,6 +30,16 @@ const AdminSidebar = () => {
             💰 Categorias
           </Link>
         </li>
+        <li>
+          <Link to={`/admin/proveedores`} className="block p-2 hover:bg-gray-700 rounded">
+            💰 Proveedores
+          </Link>
+        </li>
+         <li>
+          <Link to={`/admin/pedidos`} className="block p-2 hover:bg-gray-700 rounded">
+            💰 Pedidos
+          </Link>
+        </li>
       </ul>
     </aside>
   );

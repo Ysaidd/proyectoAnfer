@@ -41,6 +41,7 @@ async def get_current_user(
     """
     try:
         payload = decode_access_token(token)
+        print(f"🔍 PAYLOAD RECIBIDO: {payload}")  # ⬅️ Muy importante
         email: str = payload.get("sub")
         role: UserRole = payload.get("role")
 

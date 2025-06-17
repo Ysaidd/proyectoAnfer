@@ -1,37 +1,66 @@
 import { useState } from "react";
 
-const VariantForm = ({ variant, onClose }) => {
+const VariantForm = ({ variant, onClose, onSave }) => { // Añadido onSave para refrescar la lista
   const [formData, setFormData] = useState({
-    size: variant.size,
-    color: variant.color,
-    stock: variant.stock,
+    size: variant?.size || "",
+    color: variant?.color || "",
+    stock: variant?.stock || 0,
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.name === "stock" ? parseFloat(e.target.value) : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validaciones básicas antes de enviar
+    if (!formData.size.trim()) {
+      alert("La talla de la variante es obligatoria.");
+      return;
+    }
+    if (!formData.color.trim()) {
+      alert("El color de la variante es obligatorio.");
+      return;
+    }
+    if (formData.stock === null || formData.stock === undefined || isNaN(formData.stock) || formData.stock < 0) {
+      alert("El stock es obligatorio y debe ser un número entero no negativo.");
+      return;
+    }
+
+
     try {
-      const response = await fetch(`http://localhost:8000/products/${variant.id}`, {
+      // *** CORRECCIÓN CLAVE: Endpoint apuntando a /products/variants/{variant.id} ***
+      const response = await fetch(`http://localhost:8000/products/variants/${variant.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        // Mapear formData a la estructura JSON que espera el backend
+        body: JSON.stringify({
+          color: formData.color,
+          talla: formData.size, // El backend espera 'talla', no 'size'
+          stock: parseInt(formData.stock), // Asegurarse de que stock sea un entero
+        }),
       });
 
-      if (!response.ok) throw new Error("Error al actualizar la variante");
+      if (!response.ok) {
+        const errorDetail = await response.text(); // Intenta leer el detalle del error
+        throw new Error(`Error al actualizar la variante: ${errorDetail}`);
+      }
 
       alert("✅ Variante actualizada correctamente.");
-      onClose();
+      onClose(); // Cierra el modal
+      if (onSave) {
+          onSave(); // Notifica al componente padre (ej. Products.jsx) para que recargue los datos
+      }
     } catch (error) {
       console.error("Error:", error);
-      alert("❌ No se pudo actualizar la variante.");
+      alert(`❌ No se pudo actualizar la variante. Detalles: ${error.message}`);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">✏️ Editar Variante</h2>
         <form onSubmit={handleSubmit}>
@@ -54,7 +83,7 @@ const VariantForm = ({ variant, onClose }) => {
           />
 
           <label className="block text-gray-700">Stock</label>
-          <input
+          <input disabled
             type="number"
             name="stock"
             value={formData.stock}

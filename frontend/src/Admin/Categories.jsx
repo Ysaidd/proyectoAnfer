@@ -68,7 +68,7 @@ const CategoryManager = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/categories/');
+      const response = await fetch('http://localhost:8000/categorias/');
       if (!response.ok) throw new Error('Error al cargar categorías');
       const data = await response.json();
       setCategories(data);
@@ -81,7 +81,7 @@ const CategoryManager = () => {
 
   const handleCreateCategory = async (categoryData) => {
     try {
-      const response = await fetch('http://localhost:8000/categories/', {
+      const response = await fetch('http://localhost:8000/categorias/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const CategoryManager = () => {
   const handleUpdateCategory = async (categoryData) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/categories/${editingCategory.id}`,
+        `http://localhost:8000/categorias/${editingCategory.id}`,
         {
           method: 'PUT',
           headers: {
@@ -117,7 +117,7 @@ const CategoryManager = () => {
   const handleDeleteCategory = async (categoryId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/categories/${categoryId}`,
+        `http://localhost:8000/categorias/${categoryId}`,
         {
           method: 'DELETE',
         }
