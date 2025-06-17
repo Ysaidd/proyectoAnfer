@@ -11,6 +11,8 @@ import AdminUsers from "../pages/AdminUsers";
 import AdminSales from "../pages/AdminSales";
 import Error404 from "../pages/NotFounded"; 
 import CategoryManagerr from "../pages/AdminCategories";
+import ProveedoresManager from "../pages/AdminProveedores";
+import AdminPedidos from "../pages/AdminPedidos";
 
 const AppRouter = () => {
     return (
@@ -42,6 +44,8 @@ const AppRouter = () => {
         <Route path="users" element={<AdminUsers />} />
         <Route path="sales" element={<AdminSales />} />
         <Route path="categories" element={<CategoryManagerr />} />
+        <Route path="proveedores" element={<ProveedoresManager/>} />
+        <Route path="pedidos" element={<AdminPedidos/>} />
       </Route>
 
       {/* Ruta 404 debe estar FUERA de las demás rutas */}
