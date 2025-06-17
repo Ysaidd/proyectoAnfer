@@ -13,11 +13,10 @@ class ProductSimpleResponse(BaseModel):
     nombre: str
     descripcion: str
     precio: float
-    categoria_id: int # Si quieres mostrar el ID de la categoría
-    proveedor_id: int # Si quieres mostrar el ID del proveedor
+    categoria_id: int
+    proveedor_id: int 
 
-    # Puedes incluir la categoría y el proveedor aquí si es necesario,
-    # pero asegúrate de que tampoco creen ciclos.
+
     categoria: Optional[CategoriaResponse] = None
     proveedor: Optional[ProveedorResponse] = None
 
@@ -53,7 +52,7 @@ class ProductBase(BaseModel):
     nombre: str
     descripcion: str
     precio: float
-
+    image_url: Optional[str] = None
 
 class ProductCreate(ProductBase):
     categoria_id: int
@@ -65,11 +64,13 @@ class ProductUpdate(ProductBase):
     categoria_id: int
     proveedor_id: int
 
+
 class ProductResponse(ProductBase):
     id: int
     categoria: CategoriaResponse
     variantes: List[VarianteProductoResponse] # Aquí sí queremos todas las variantes
     proveedor: Optional[ProveedorResponse] = None
+    image_url: Optional[str] = None
 
     model_config = ConfigDict(
         from_attributes=True,

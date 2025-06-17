@@ -41,7 +41,7 @@ const CartItem = ({ item }) => {
       </td>
 
       {/* 💲 Precio unitario */}
-      <td className="text-gray-700">${item.price.toFixed(2)}</td>
+      <td className="text-gray-700">${item.precio}</td>
 
       {/* 🔄 Modificar cantidad */}
       <td>
@@ -56,7 +56,7 @@ const CartItem = ({ item }) => {
 
       {/* 🛒 Subtotal */}
       <td className="text-gray-700 font-semibold">
-        ${(item.price * quantity).toFixed(2)}
+        ${(item.precio * quantity).toFixed(2)}
       </td>
     </tr>
   );

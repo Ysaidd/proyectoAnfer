@@ -11,7 +11,7 @@ export const CartProvider = ({ children, initialProducts }) => {
 
   const addToCart = (product, quantity, variantId) => {
     // Buscar la variante completa
-    const variant = product.variants.find((v) => v.id === variantId);
+    const variant = product.variantes.find((v) => v.id === variantId);
     
     if (!product || !variant) {
       console.error("Error: Producto o variante inválida");

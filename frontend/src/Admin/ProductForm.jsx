@@ -1,24 +1,38 @@
+// ProductForm.jsx
 import { useState, useEffect } from "react";
 
 const ProductForm = ({ product, onClose, onSave }) => {
   const [formData, setFormData] = useState(
-    product || {
-      name: "",
-      description: "",
-      price: 0,
-      category_id: "",
-      proveedor_id: "",
-      variants: [],
-      // image: null, // <--- ELIMINADO
-    }
+    product
+      ? {
+          name: product.nombre || "",
+          description: product.descripcion || "",
+          price: product.precio || 0,
+          category_id: product.categoria?.id || "",
+          proveedor_id: product.proveedor?.id || "",
+          variants: product.variantes || [],
+        }
+      : {
+          name: "",
+          description: "",
+          price: 0,
+          category_id: "",
+          proveedor_id: "",
+          variants: [],
+        }
   );
 
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [imageUploadError, setImageUploadError] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
   const [categories, setCategories] = useState([]);
-  const [searchCategory, setSearchCategory] = useState("");
+  // *** CAMBIO CRÍTICO AQUÍ: Usar product?.categoria?.name para inicializar searchCategory
+  const [searchCategory, setSearchCategory] = useState(product?.categoria?.name || "");
   const [filteredCategories, setFilteredCategories] = useState([]);
 
   const [providers, setProviders] = useState([]);
-  const [searchProvider, setSearchProvider] = useState("");
+  const [searchProvider, setSearchProvider] = useState(product?.proveedor?.nombre || "");
   const [filteredProviders, setFilteredProviders] = useState([]);
 
   const [variant, setVariant] = useState({ size: "", color: "", stock: "" });
@@ -26,14 +40,20 @@ const ProductForm = ({ product, onClose, onSave }) => {
   useEffect(() => {
     // Cargar categorías desde la API
     fetch("http://localhost:8000/categorias")
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
         setCategories(data);
-        if (product && product.categoria && data.length > 0) {
-          const initialCategory = data.find(cat => cat.id === product.categoria.id);
+        if (product && product.categoria) {
+          const initialCategory = data.find((cat) => cat.id === product.categoria.id);
           if (initialCategory) {
+            // *** CAMBIO CRÍTICO AQUÍ: Usar initialCategory.name
             setSearchCategory(initialCategory.name);
-            setFormData(prev => ({ ...prev, category_id: initialCategory.id }));
+            setFormData((prev) => ({ ...prev, category_id: initialCategory.id }));
           }
         }
       })
@@ -47,10 +67,10 @@ const ProductForm = ({ product, onClose, onSave }) => {
       .then((data) => {
         setProviders(data);
         if (product && product.proveedor && data.length > 0) {
-          const initialProvider = data.find(prov => prov.id === product.proveedor.id);
+          const initialProvider = data.find((prov) => prov.id === product.proveedor.id);
           if (initialProvider) {
             setSearchProvider(initialProvider.nombre);
-            setFormData(prev => ({ ...prev, proveedor_id: initialProvider.id }));
+            setFormData((prev) => ({ ...prev, proveedor_id: initialProvider.id }));
           }
         }
       })
@@ -58,24 +78,24 @@ const ProductForm = ({ product, onClose, onSave }) => {
   }, [product]);
 
   useEffect(() => {
-    // Filtrar categorías en tiempo real
-    if (searchCategory) {
-      setFilteredCategories(
-        categories.filter((cat) =>
-          cat.name.toLowerCase().includes(searchCategory.toLowerCase())
-        )
+    // Lógica de filtrado de categorías
+    if (searchCategory && categories.length > 0) {
+      const filtered = categories.filter((cat) =>
+        // *** CAMBIO CRÍTICO AQUÍ: Usar cat.name y su toLowerCase()
+        cat.name && cat.name.toLowerCase().includes(searchCategory.toLowerCase())
       );
+      setFilteredCategories(filtered);
     } else {
       setFilteredCategories([]);
     }
   }, [searchCategory, categories]);
 
   useEffect(() => {
-    // Filtrar proveedores en tiempo real
-    if (searchProvider) {
+    // Lógica de filtrado de proveedores (este ya funcionaba bien)
+    if (searchProvider && providers.length > 0) {
       setFilteredProviders(
         providers.filter((prov) =>
-          prov.nombre.toLowerCase().includes(searchProvider.toLowerCase())
+          prov.nombre && prov.nombre.toLowerCase().includes(searchProvider.toLowerCase())
         )
       );
     } else {
@@ -89,6 +109,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
 
   const handleSelectCategory = (category) => {
     setFormData({ ...formData, category_id: category.id });
+    // *** CAMBIO CRÍTICO AQUÍ: Usar category.name
     setSearchCategory(category.name);
     setFilteredCategories([]);
   };
@@ -103,80 +124,141 @@ const ProductForm = ({ product, onClose, onSave }) => {
     setVariant({ ...variant, [e.target.name]: e.target.value });
   };
 
-  // const handleImageChange = (e) => { // <--- ELIMINADO
-  //   setFormData({ ...formData, image: e.target.files[0] }); // <--- ELIMINADO
-  // }; // <--- ELIMINADO
+  const handleImageFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            setImageUploadError("Tipo de archivo no soportado. Solo JPG, PNG, GIF.");
+            setSelectedImageFile(null);
+            return;
+        }
+        setSelectedImageFile(file);
+        setImageUploadError(null);
+    }
+  };
 
   const addVariant = () => {
     if (!variant.size || !variant.color || !variant.stock) {
       alert("Completa todos los campos de la variante.");
       return;
     }
-    setFormData({ 
-      ...formData, 
-      variants: [...formData.variants, { 
-        talla: variant.size,
-        color: variant.color, 
-        stock: parseInt(variant.stock)
-      }] 
+    setFormData({
+      ...formData,
+      variants: [
+        ...formData.variants,
+        {
+          talla: variant.size,
+          color: variant.color,
+          stock: parseInt(variant.stock),
+        },
+      ],
     });
     setVariant({ size: "", color: "", stock: "" });
   };
 
+  const uploadProductImage = async (productId, imageFile) => {
+    if (!imageFile || !productId) return null;
+
+    setIsUploadingImage(true);
+    setImageUploadError(null);
+
+    const formData = new FormData();
+    formData.append('file', imageFile);
+
+    try {
+        const response = await fetch(`http://localhost:8000/products/${productId}/upload-image`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+        }
+
+        const updatedProduct = await response.json();
+        console.log("Producto actualizado con imagen:", updatedProduct);
+        return updatedProduct.image_url;
+    } catch (err) {
+        setImageUploadError(`❌ Error al subir la imagen: ${err.message}`);
+        console.error("Error al subir la imagen:", err);
+        return null;
+    } finally {
+        setIsUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.description || formData.price <= 0 || !formData.category_id || !formData.proveedor_id) {
-        alert("Por favor, rellena todos los campos obligatorios (Nombre, Descripción, Precio, Categoría, Proveedor).");
-        return;
+    if (
+      !formData.name ||
+      !formData.description ||
+      formData.price <= 0 ||
+      !formData.category_id ||
+      !formData.proveedor_id
+    ) {
+      alert(
+        "Por favor, rellena todos los campos obligatorios (Nombre, Descripción, Precio, Categoría, Proveedor)."
+      );
+      return;
     }
     if (formData.variants.length === 0) {
-        alert("Debes agregar al menos una variante.");
-        return;
+      alert("Debes agregar al menos una variante.");
+      return;
     }
-    
-    // Aquí el FormData cambia porque ya no enviamos un archivo de imagen.
-    // Si tu backend espera un JSON, entonces deberíamos enviar un JSON.
-    // Basándome en el formato JSON que me diste al principio, voy a asumir
-    // que el backend espera un JSON.
+
     const productData = {
-        nombre: formData.name,
-        descripcion: formData.description,
-        precio: parseFloat(formData.price), // Asegurar que sea float
-        categoria_id: parseInt(formData.category_id), // Asegurar que sea int
-        proveedor_id: parseInt(formData.proveedor_id), // Asegurar que sea int
-        variantes: formData.variants, // Ya es un array de objetos
+      nombre: formData.name,
+      descripcion: formData.description,
+      precio: parseFloat(formData.price),
+      categoria_id: parseInt(formData.category_id),
+      proveedor_id: parseInt(formData.proveedor_id),
+      variantes: formData.variants,
     };
 
+    let savedProduct = null;
     try {
-        const url = product 
-            ? `http://localhost:8000/products/${product.id}`
-            : "http://localhost:8000/products";
+      const url = product
+        ? `http://localhost:8000/products/${product.id}`
+        : "http://localhost:8000/products";
 
-        const method = product ? "PUT" : "POST";
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                "Content-Type": "application/json", // <--- ¡IMPORTANTE! Enviamos JSON
-            },
-            body: JSON.stringify(productData), // <--- Enviamos el objeto como JSON string
-        });
+      const method = product ? "PUT" : "POST";
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error al ${product ? "editar" : "crear"} el producto: ${errorText}`);
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error al ${product ? "editar" : "crear"} el producto: ${errorText}`);
+      }
+
+      savedProduct = await response.json();
+
+      if (selectedImageFile) {
+        const imageUrl = await uploadProductImage(savedProduct.id, selectedImageFile);
+        if (!imageUrl) {
+          console.warn("La imagen no pudo ser subida, pero el producto se guardó.");
+        } else {
+          alert(`✅ Producto ${product ? "editado" : "creado"} correctamente y con imagen.`);
         }
+      } else {
+        alert(`✅ Producto ${product ? "editado" : "creado"} correctamente (sin imagen nueva).`);
+      }
 
-        alert(`✅ Producto ${product ? "editado" : "creado"} correctamente.`);
-        if (onSave) {
-            onSave();
-        }
-        onClose();
+      if (onSave) {
+        onSave(savedProduct);
+      }
+      onClose();
     } catch (error) {
-        console.error("Error:", error);
-        alert(`❌ No se pudo ${product ? "editar" : "crear"} el producto. ${error.message}`);
+      console.error("Error:", error);
+      alert(`❌ No se pudo ${product ? "editar" : "crear"} el producto. ${error.message}`);
     }
   };
 
@@ -225,7 +307,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
         />
 
         {/* Lista de categorías filtradas */}
-        {filteredCategories.length > 0 && (
+        {searchCategory && filteredCategories.length > 0 && (
           <ul className="bg-white border rounded shadow-md mt-2 max-h-40 overflow-y-auto">
             {filteredCategories.map((category) => (
               <li
@@ -233,11 +315,18 @@ const ProductForm = ({ product, onClose, onSave }) => {
                 onClick={() => handleSelectCategory(category)}
                 className="p-2 hover:bg-gray-200 cursor-pointer"
               >
-                {category.name}
+                {category.name} {/* *** CAMBIO CRÍTICO AQUÍ: Usar category.name */}
               </li>
             ))}
           </ul>
         )}
+        {searchCategory && filteredCategories.length === 0 && categories.length > 0 && (
+          <p className="text-sm text-gray-500 mb-2">No se encontraron categorías.</p>
+        )}
+        {!searchCategory && categories.length > 0 && (
+            <p className="text-sm text-gray-500 mb-2">Empieza a escribir para buscar categorías.</p>
+        )}
+
 
         {/* --- Buscador de proveedores --- */}
         <label className="block text-gray-700 mt-3">Proveedor</label>
@@ -250,7 +339,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
         />
 
         {/* Lista de proveedores filtrados */}
-        {filteredProviders.length > 0 && (
+        {searchProvider && filteredProviders.length > 0 && (
           <ul className="bg-white border rounded shadow-md mt-2 max-h-40 overflow-y-auto">
             {filteredProviders.map((provider) => (
               <li
@@ -263,10 +352,29 @@ const ProductForm = ({ product, onClose, onSave }) => {
             ))}
           </ul>
         )}
+        {searchProvider && filteredProviders.length === 0 && providers.length > 0 && (
+          <p className="text-sm text-gray-500 mb-2">No se encontraron proveedores.</p>
+        )}
+        {!searchProvider && providers.length > 0 && (
+            <p className="text-sm text-gray-500 mb-2">Empieza a escribir para buscar proveedores.</p>
+        )}
 
-        {/* <label className="block text-gray-700 mt-3">Imagen</label> */} {/* <--- ELIMINADO */}
-        {/* <input type="file" onChange={handleImageChange} className="w-full p-2 border mb-3" /> */} {/* <--- ELIMINADO */}
-
+        {/* --- Campo de entrada para la imagen --- */}
+        <label className="block text-gray-700 mt-3">Imagen del Producto</label>
+        <input
+            type="file"
+            accept="image/jpeg, image/png, image/gif"
+            onChange={handleImageFileChange}
+            disabled={isUploadingImage}
+            className="w-full p-2 border border-gray-300 rounded-md mb-3"
+        />
+        {imageUploadError && <p style={{ color: 'red', fontSize: '0.85em' }}>{imageUploadError}</p>}
+        {product?.image_url && (
+            <div className="mb-3">
+                <p className="text-sm text-gray-600">Imagen actual:</p>
+                <img src={`http://localhost:8000/static/${product.image_url}`} alt="Imagen actual" style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover', border: '1px solid #ddd' }} />
+            </div>
+        )}
 
         {/* --- AGREGAR VARIANTES --- */}
         <h3 className="text-lg font-bold mt-4">Variantes</h3>
@@ -322,10 +430,12 @@ const ProductForm = ({ product, onClose, onSave }) => {
             ❌ Cancelar
           </button>
           <button
+            type="submit"
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            disabled={isUploadingImage}
           >
-            ✅ Guardar
+            {isUploadingImage ? 'Guardando imagen...' : '✅ Guardar'}
           </button>
         </div>
       </div>

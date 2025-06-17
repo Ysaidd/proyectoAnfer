@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 from app.database import Base
-
+import sqlalchemy as sa
 
 class Producto(Base):
     __tablename__ = "productos"
@@ -12,6 +12,7 @@ class Producto(Base):
     precio = Column(Numeric(10, 2), nullable=False)
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=False)
     proveedor_id = Column(Integer, ForeignKey("proveedor.id"), nullable=False)
+    image_url = sa.Column(sa.String, nullable=True)
     
     categoria = relationship("Categoria", back_populates="productos")
     proveedor = relationship("Proveedor", back_populates="productos")

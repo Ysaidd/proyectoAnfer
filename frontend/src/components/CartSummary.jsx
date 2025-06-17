@@ -7,7 +7,7 @@ const CartSummary = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartItems.reduce((sum, item) => sum + item.precio * item.quantity, 0);
 
   const handleCheckout = async () => {
     if (!customerPhone.trim()) {

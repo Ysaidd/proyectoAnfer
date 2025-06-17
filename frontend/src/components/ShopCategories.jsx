@@ -17,7 +17,7 @@ const StorePage = () => {
     const fetchData = async () => {
       const [productRes, categoryRes] = await Promise.all([
         fetch("http://localhost:8000/products"),
-        fetch("http://localhost:8000/categories")
+        fetch("http://localhost:8000/categorias")
       ]);
       const [productData, categoryData] = await Promise.all([
         productRes.json(),

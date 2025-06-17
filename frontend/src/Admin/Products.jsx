@@ -14,6 +14,8 @@ const Products = () => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [categoriesMap, setCategoriesMap] = useState({});
 
+  // Aseguramos que fetchProducts siempre se tenga en cuenta si cambia el estado del componente
+  // al ser usada en un useEffect, aunque aquí no debería cambiar
   const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:8000/products");
@@ -21,13 +23,13 @@ const Products = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("🧪 Productos desde API (Recargado):", data);
+      console.log("Productos desde API (Products.jsx):", data); // Verifica esta salida
       const sortedProducts = data.sort((a, b) => a.id - b.id);
       setProducts(sortedProducts);
     } catch (error) {
-      console.error("Error cargando productos:", error);
+      console.error("Error cargando productos en Products.jsx:", error);
     }
-  }, []);
+  }, []); // Dependencias vacías, solo se crea una vez
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -40,32 +42,33 @@ const Products = () => {
       data.forEach((cat) => {
         map[cat.id] = cat.name;
       });
-      console.log("🗺️ Mapa de Categorías:", map);
       setCategoriesMap(map);
     } catch (error) {
-      console.error("Error cargando categorías:", error);
+      console.error("Error cargando categorías en Products.jsx:", error);
     }
   }, []);
 
+  // Carga inicial de productos y categorías
   useEffect(() => {
     fetchProducts();
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
+  // Filtrado de productos (tu lógica aquí está bien)
   useEffect(() => {
     if (search) {
       setFilteredProducts(
         products.filter((product) =>
           product.nombre.toLowerCase().includes(search.toLowerCase()) ||
           product.descripcion.toLowerCase().includes(search.toLowerCase()) ||
-          categoriesMap[product.categoria?.id]?.toLowerCase().includes(search.toLowerCase()) ||
+          (product.categoria?.name && product.categoria.name.toLowerCase().includes(search.toLowerCase())) || // Usar product.categoria.name
           product.proveedor?.nombre?.toLowerCase().includes(search.toLowerCase())
         )
       );
     } else {
       setFilteredProducts(products);
     }
-  }, [search, products, categoriesMap]);
+  }, [search, products]); // Eliminamos categoriesMap de aquí, ya que el filtrado por categoría ya está bien
 
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm("¿Estás seguro de que quieres eliminar este producto y todas sus variantes?")) {
@@ -78,11 +81,11 @@ const Products = () => {
       if (!response.ok) {
         throw new Error("Error al eliminar el producto");
       }
-      alert("✅ Producto eliminado correctamente.");
-      fetchProducts();
+      alert("Producto eliminado correctamente.");
+      fetchProducts(); // Recarga los productos para que la lista se actualice
     } catch (error) {
       console.error("Error eliminando producto:", error);
-      alert("❌ No se pudo eliminar el producto.");
+      alert("No se pudo eliminar el producto.");
     }
   };
 
@@ -97,11 +100,11 @@ const Products = () => {
       if (!response.ok) {
         throw new Error("Error al eliminar la variante");
       }
-      alert("✅ Variante eliminada correctamente.");
-      fetchProducts();
+      alert("Variante eliminada correctamente.");
+      fetchProducts(); // Recarga los productos para que la lista se actualice
     } catch (error) {
       console.error("Error eliminando variante:", error);
-      alert("❌ No se pudo eliminar la variante.");
+      alert("No se pudo eliminar la variante.");
     }
   };
 
@@ -110,21 +113,36 @@ const Products = () => {
     setIsFormOpen(true);
   };
 
-  const handleProductSave = () => {
-    fetchProducts();
+  // Esta función es CRUCIAL para que el ProductForm o FormEditPrincipal
+  // le digan a Products que se ha guardado algo.
+  const handleProductSave = (updatedProductData) => {
+    console.log("Producto guardado/actualizado, recargando lista:", updatedProductData);
+    fetchProducts(); // Esto es lo que recarga la lista de productos
     setIsFormOpen(false);
     setIsEditPrincipalOpen(false);
+    // setIsVariantFormOpen(false); // Podrías necesitar esto si la variante actualiza la lista principal
+  };
+
+  // Función para construir la URL correcta de la imagen
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+        // console.log("No imagePath provided, returning null."); // Para depuración
+        return null; // O una imagen de placeholder por defecto
+    }
+    // Asegurarse de que la ruta comienza con 'images/' si es lo que devuelve el backend
+    const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
+    const fullUrl = `http://localhost:8000/static/${cleanPath}`;
+    // console.log("Constructed image URL:", fullUrl); // Para depuración
+    return fullUrl;
   };
 
   return (
     <div className="p-6">
-      {/* Título principal de la página */}
       <h1 className="text-2xl font-bold mb-2">📦 Productos</h1>
       <p className="text-gray-600 mb-4">
         Administra todos los productos de la tienda.
       </p>
 
-      {/* Buscador de productos */}
       <input
         type="text"
         placeholder="🔍 Buscar producto..."
@@ -133,7 +151,6 @@ const Products = () => {
         className="w-full p-2 border border-gray-300 rounded-md mb-4"
       />
 
-      {/* Tabla de productos */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-600 shadow-md rounded-lg">
           <thead className="bg-blue-700 text-white">
@@ -169,8 +186,25 @@ const Products = () => {
                         rowSpan={product.variantes?.length || 1}
                         className="border border-gray-700 p-3 align-middle"
                       >
-                        {/* Espacio para la imagen */}
-                        <span className="text-gray-500">Sin imagen</span>
+                        {/* Aquí es donde se muestra la imagen */}
+                        {product.image_url ? (
+                          <img
+                            // Asegúrate de que getImageUrl devuelve la ruta completa correcta
+                            src={getImageUrl(product.image_url)}
+                            alt={product.nombre}
+                            className="w-16 h-16 object-cover rounded-md"
+                            onError={(e) => {
+                              // Esto es clave: si la imagen no carga, muestra un placeholder.
+                              // Ayuda a debuggear si la URL es correcta pero el archivo no existe o está corrupto.
+                              e.target.onerror = null; // Evita bucles infinitos de error
+                              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-md">
+                            <span className="text-gray-500 text-xs text-center">Sin imagen</span>
+                          </div>
+                        )}
                       </td>
                       <td
                         rowSpan={product.variantes?.length || 1}
@@ -188,7 +222,7 @@ const Products = () => {
                         rowSpan={product.variantes?.length || 1}
                         className="border border-gray-700 p-3 align-middle font-medium"
                       >
-                        {categoriesMap[product.categoria?.id] || "Sin categoría"}
+                        {product.categoria?.name || "Sin categoría"} {/* Usar product.categoria.name directamente */}
                       </td>
                       <td
                         rowSpan={product.variantes?.length || 1}
@@ -263,24 +297,24 @@ const Products = () => {
       </button>
 
       {isFormOpen && (
-        <ProductForm 
-          product={selectedProduct} 
-          onClose={() => setIsFormOpen(false)} 
-          onSave={handleProductSave} 
+        <ProductForm
+          product={selectedProduct}
+          onClose={() => setIsFormOpen(false)}
+          onSave={handleProductSave}
         />
       )}
       {isEditPrincipalOpen && selectedProduct && (
-        <FormEditPrincipal 
-          product={selectedProduct} 
-          onClose={() => setIsEditPrincipalOpen(false)} 
-          onSave={handleProductSave} 
+        <FormEditPrincipal
+          product={selectedProduct}
+          onClose={() => setIsEditPrincipalOpen(false)}
+          onSave={handleProductSave}
         />
       )}
       {isVariantFormOpen && selectedVariant && (
-        <VariantForm 
-          variant={selectedVariant} 
-          onClose={() => setIsVariantFormOpen(false)} 
-          onSave={handleProductSave} 
+        <VariantForm
+          variant={selectedVariant}
+          onClose={() => setIsVariantFormOpen(false)}
+          onSave={handleProductSave}
         />
       )}
     </div>
