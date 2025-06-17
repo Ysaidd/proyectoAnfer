@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.modules.pedidos.pedido_model import Pedido
 
 class Proveedor(Base):
     __tablename__ = "proveedor"

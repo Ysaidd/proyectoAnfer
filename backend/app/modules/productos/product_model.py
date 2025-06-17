@@ -2,6 +2,10 @@ from sqlalchemy import Column, String, Integer, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 from app.database import Base
 import sqlalchemy as sa
+from app.modules.categorias.categoria_model import Categoria
+from app.modules.proveedores.proveedor_model import Proveedor
+
+
 
 class Producto(Base):
     __tablename__ = "productos"

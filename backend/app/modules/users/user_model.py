@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, String, Boolean
 from app.database import Base
 from sqlalchemy.orm import relationship
+from app.modules.ventas.ventas_model import Venta  # Asegúrate de que esta importación sea correcta
 
 class User(Base):
     __tablename__ = "users"

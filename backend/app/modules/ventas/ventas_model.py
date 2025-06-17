@@ -4,6 +4,8 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKe
 from sqlalchemy.orm import relationship
 from app.database import Base # ¡Asegúrate de que esta importación sea correcta!
 import enum
+from app.modules.productos.product_model import VarianteProducto
+
 
 class EstadoVenta(str, enum.Enum):
     pendiente = "pendiente"
