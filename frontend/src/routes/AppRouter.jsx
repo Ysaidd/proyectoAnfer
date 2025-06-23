@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet  } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import Home from "../pages/Home";
 import Products from "../pages/Products";
 import Cart from "../pages/Cart";
@@ -13,44 +13,70 @@ import Error404 from "../pages/NotFounded";
 import CategoryManagerr from "../pages/AdminCategories";
 import ProveedoresManager from "../pages/AdminProveedores";
 import AdminPedidos from "../pages/AdminPedidos";
+import RegisterForm from "../pages/Auth/register";
+import LoginForm from "../pages/Auth/login";
+import ProtectedRoute from "../routes/ProtectedRouter"; // Asegúrate que la ruta sea correcta
 
 const AppRouter = () => {
     return (
         <Routes>
-      {/* Ruta principal CON Navbar/Footer */}
-      <Route
-        path="/"
-        element={
-          <>
-            <Navbar />
-            <Outlet /> {/* Aquí se renderizarán las subrutas */}
-            <Footer />
-          </>
-        }
-      >
-        <Route index element={<Home />} />
-        <Route path="products" element={<Products />} />
-        <Route path="cart" element={<Cart />} />
-        <Route path="product/:productId" element={<ProductPage />} />
-      </Route>
+            <Route
+                path="/"
+                element={
+                    <>
+                        <Navbar />
+                        <Outlet />
+                        <Footer />
+                    </>
+                }
+            >
+                <Route index element={<Home />} />
+                <Route path="products" element={<Products />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="product/:productId" element={<ProductPage />} />
+                <Route path="register" element={<RegisterForm/>} />
+                <Route path="login" element={<LoginForm/>} />
+                {/* Puedes añadir rutas que requieran autenticación básica (para clientes) aquí, por ejemplo: */}
+                {/* <Route 
+                    path="my-account" 
+                    element={
+                        <ProtectedRoute allowedRoles={['client', 'admin', 'manager']}>
+                            <MyAccountPage /> 
+                        </ProtectedRoute>
+                    } 
+                /> */}
+            </Route>
 
-      {/* Ruta de Admin SIN Navbar/Footer */}
-      <Route
-        path="/admin"
-        element={<Outlet />} // Contenedor para subrutas de admin
-      >
-        <Route index element={<AdminPrincipal />} />
-        <Route path="products" element={<AdminProducts />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="sales" element={<AdminSales />} />
-        <Route path="categories" element={<CategoryManagerr />} />
-        <Route path="proveedores" element={<ProveedoresManager/>} />
-        <Route path="pedidos" element={<AdminPedidos/>} />
-      </Route>
+            <Route
+                path="/admin"
 
-      {/* Ruta 404 debe estar FUERA de las demás rutas */}
-      <Route path="*" element={<Error404 />} />
-    </Routes>
+                element={
+                    <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <Outlet /> 
+                    </ProtectedRoute>
+                }
+            >
+                {/* Todas estas subrutas ahora están protegidas por el componente padre */}
+                <Route index element={<AdminPrincipal />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="sales" element={<AdminSales />} />
+                <Route path="categories" element={<CategoryManagerr />} />
+                <Route path="proveedores" element={<ProveedoresManager/>} />
+                <Route path="pedidos" element={<AdminPedidos/>} />
+            </Route>
+
+            {/* Ruta 404 debe estar FUERA de las demás rutas */}
+            {/* Opcional: Ruta para acceso no autorizado, si la creas */}
+            <Route path="/unauthorized" element={
+                <div style={{ textAlign: 'center', marginTop: '50px' }}>
+                    <h2>Acceso Denegado</h2>
+                    <p>No tienes los permisos necesarios para ver esta página.</p>
+                    <a href="/">Ir a la página principal</a>
+                </div>
+            } />
+            <Route path="*" element={<Error404 />} />
+        </Routes>
     );
 };
 

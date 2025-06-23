@@ -11,7 +11,7 @@ from app.modules.users.user_schema import UserRole # Para los roles del usuario
 from app.modules.auth.security import decode_access_token
 
 # Esquema de seguridad para OAuth2 con flujo de contraseña (para swagger UI)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 # --- Dependencia para obtener el UserService ---
 def get_user_service_dependency(db: Session = Depends(get_db)) -> UserService:

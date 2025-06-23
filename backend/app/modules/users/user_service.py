@@ -62,3 +62,10 @@ class UserService:
         db_user = self.get_user(user_id)
         self.db.delete(db_user)
         self.db.commit()
+
+    def register_client(self, user_data: schemas.UserCreate) -> models.User:
+
+        if user_data.role != schemas.UserRole.CLIENT:
+            raise ValueError("El rol debe ser de cliente.")
+        
+        return self.create_user(user_data)
