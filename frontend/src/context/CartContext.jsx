@@ -23,10 +23,10 @@ export const CartProvider = ({ children, initialProducts }) => {
       variant_id: variant.id,  // Campo necesario para el endpoint
       product_id: product.id,
       name: product.name,
-      price: product.price,
+      precio: product.precio,
       image: product.image_url,
       quantity,
-      size: variant.size,
+      talla: variant.talla,
       color: variant.color,
     };
   

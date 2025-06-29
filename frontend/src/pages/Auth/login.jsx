@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '../../context/AuthContext'; // Importa el hook useAuth
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Obtén la función login del contexto
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,36 +38,17 @@ const LoginForm = () => {
       }
 
       const data = await response.json();
-      console.log('Inicio de sesión exitoso - Datos recibidos:', data); // <-- Primer log
+      console.log('Inicio de sesión exitoso - Datos recibidos:', data);
 
-      const accessToken = data.access_token;
-      localStorage.setItem('access_token', accessToken); 
-
-      // --- Decodificar el token para extraer el rol ---
-      const decodedToken = jwtDecode(accessToken);
-      console.log('Token decodificado:', decodedToken); // <-- Segundo log
+      // Usamos la función login del contexto en lugar de manejar localStorage directamente
+      await login(data.access_token); // Esperamos a que complete la actualización del estado
       
-      const userRole = decodedToken.role; // Asumiendo que tu payload JWT tiene un campo 'role'
-      console.log('Rol extraído del token:', userRole); // <-- Tercer log
-
-      localStorage.setItem('user_role', userRole);
-
       setSuccess('¡Inicio de sesión exitoso! Redirigiendo...');
       
-      // --- Redirección basada en el rol ---
-      let redirectTo;
-      if (userRole === 'admin' || userRole === 'manager') {
-        redirectTo = '/admin';
-      } else if (userRole === 'client') {
-        redirectTo = '/';
-      } else {
-        redirectTo = '/dashboard'; // Fallback
-      }
-      console.log('Redirigiendo a:', redirectTo); // <-- Cuarto log
-      
+      // Pequeño delay para asegurar que el estado se haya actualizado
       setTimeout(() => {
-        navigate(redirectTo); 
-      }, 1500);
+        navigate('/admin'); // La redirección ahora la manejará el ProtectedRoute
+      }, 100);
 
     } catch (err) {
       console.error('Error durante el inicio de sesión:', err);
@@ -77,7 +59,6 @@ const LoginForm = () => {
   };
 
   return (
-    // ... el resto de tu JSX es el mismo ...
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Iniciar Sesión</h2>

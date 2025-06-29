@@ -22,10 +22,12 @@ async def login_for_access_token(
     Endpoint para que los usuarios inicien sesión y obtengan un token JWT.
     """
     authenticated_user_data = auth_service.authenticate_user(form_data.username, form_data.password)
+    print("👉 authenticated_user_data:", authenticated_user_data)
     
     token = auth_service.create_auth_token(
         email=authenticated_user_data["email"],
-        role=user_schemas.UserRole(authenticated_user_data["role"])
+        role=user_schemas.UserRole(authenticated_user_data["role"]),
+        cedula=authenticated_user_data["cedula"]
     )
     return token
 

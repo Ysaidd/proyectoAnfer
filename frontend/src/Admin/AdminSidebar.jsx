@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import LogoutButton from "../components/LogoutBtn";
 
 const AdminSidebar = () => {
   return (
@@ -39,6 +40,9 @@ const AdminSidebar = () => {
           <Link to={`/admin/pedidos`} className="block p-2 hover:bg-gray-700 rounded">
             💰 Pedidos
           </Link>
+        </li>
+        <li>
+          <LogoutButton/>
         </li>
       </ul>
     </aside>

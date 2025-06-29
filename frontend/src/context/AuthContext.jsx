@@ -9,6 +9,7 @@ export const AuthContext = createContext(null);
 const AuthContextProvider = ({ children }) => { // Removido 'export' de aquí
   const [authToken, setAuthToken] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [cedula, setCedula] = useState(null) 
   const [loading, setLoading] = useState(true);
 
   const login = (token) => {
@@ -18,7 +19,9 @@ const AuthContextProvider = ({ children }) => { // Removido 'export' de aquí
     try {
       const decodedToken = jwtDecode(token);
       setUserRole(decodedToken.role);
+      setCedula(decodedToken.cedula);
       localStorage.setItem('user_role', decodedToken.role);
+      localStorage.setItem("user_cedula", decodedToken.cedula)
     } catch (error) {
       console.error("Error al decodificar el token JWT durante el login:", error);
       logout();
@@ -30,23 +33,21 @@ const AuthContextProvider = ({ children }) => { // Removido 'export' de aquí
     setUserRole(null);
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_role');
+    localStorage.removeItem('user_cedula');
+    
   };
 
   useEffect(() => {
     const storedToken = localStorage.getItem('access_token');
     const storedRole = localStorage.getItem('user_role');
+    const storedCedula = localStorage.getItem('user_cedula');
 
-    if (storedToken && storedRole) {
+    if (storedToken && storedRole && storedCedula) {
       try {
         const decodedToken = jwtDecode(storedToken);
-        // Opcional: Aquí puedes añadir una verificación de expiración del token
-        // if (decodedToken.exp * 1000 < Date.now()) {
-        //   console.log("Token expirado.");
-        //   logout();
-        // } else {
           setAuthToken(storedToken);
           setUserRole(storedRole);
-        // }
+          setCedula(storedCedula)
       } catch (error) {
         console.error("Error al decodificar token JWT almacenado:", error);
         logout();
@@ -60,6 +61,7 @@ const AuthContextProvider = ({ children }) => { // Removido 'export' de aquí
     userRole,
     isAuthenticated: !!authToken,
     loading,
+    cedula,
     login,
     logout,
   };

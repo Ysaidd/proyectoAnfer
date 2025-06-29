@@ -36,7 +36,6 @@ const AppRouter = () => {
                 <Route path="product/:productId" element={<ProductPage />} />
                 <Route path="register" element={<RegisterForm/>} />
                 <Route path="login" element={<LoginForm/>} />
-                {/* Puedes añadir rutas que requieran autenticación básica (para clientes) aquí, por ejemplo: */}
                 {/* <Route 
                     path="my-account" 
                     element={
@@ -66,8 +65,6 @@ const AppRouter = () => {
                 <Route path="pedidos" element={<AdminPedidos/>} />
             </Route>
 
-            {/* Ruta 404 debe estar FUERA de las demás rutas */}
-            {/* Opcional: Ruta para acceso no autorizado, si la creas */}
             <Route path="/unauthorized" element={
                 <div style={{ textAlign: 'center', marginTop: '50px' }}>
                     <h2>Acceso Denegado</h2>

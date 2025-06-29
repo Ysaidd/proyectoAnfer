@@ -9,6 +9,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         return <div>Cargando autenticación...</div>; // O un componente de spinner
     }
 
+    console.log('✅ ProtectedRoute:');
+    console.log('  isAuthenticated:', isAuthenticated);
+    console.log('  userRole:', userRole);
+    console.log('  loading:', loading);
+    console.log('  allowedRoles:', allowedRoles);
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;

@@ -28,14 +28,14 @@ const CartItem = ({ item }) => {
       {/* 🖼️ Imagen + Nombre del producto */}
       <td className="flex items-center space-x-3 py-3">
         <img
-          src={`http://localhost:8000/${item.image}`} // ✅ Asegúrate de que `item.image` contiene la URL correcta
+          src={`http://localhost:8000/static/${item.image}`} // ✅ Asegúrate de que `item.image` contiene la URL correcta
           alt={item.name}
           className="w-16 h-16 object-cover"
         />
         <div>
           <p className="text-blue-600 font-semibold">{item.name}</p>
           <p className="text-sm text-gray-500">
-            <strong>Talla:</strong> {item.size} | <strong>Color:</strong> {item.color.name}
+            <strong>Talla:</strong> {item.talla} | <strong>Color:</strong> {item.color}
           </p>
         </div>
       </td>

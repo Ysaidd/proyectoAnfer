@@ -22,14 +22,15 @@ class AuthService:
         if not user.is_active:
             raise UnauthorizedException(detail="Inactive user")
         
-        return {"email": user.email, "full_name": user.full_name, "role": user.role}
+        return {"email": user.email, "full_name": user.full_name, "role": user.role, "cedula": user.cedula}
 
-    def create_auth_token(self, email: str, role: schemas.UserRole) -> schemas.Token:
+    def create_auth_token(self, email: str, role: schemas.UserRole, cedula: str) -> schemas.Token:
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         
         access_token_data = {
             "sub": email,
-            "role": role.value
+            "role": role.value,
+            "cedula": cedula
         }
         access_token = create_access_token(
             access_token_data, expires_delta=access_token_expires
