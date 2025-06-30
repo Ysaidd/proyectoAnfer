@@ -31,6 +31,7 @@ const AuthContextProvider = ({ children }) => { // Removido 'export' de aquí
   const logout = () => {
     setAuthToken(null);
     setUserRole(null);
+    setCedula(null)
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_cedula');
