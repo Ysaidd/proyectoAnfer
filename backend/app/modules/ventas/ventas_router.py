@@ -81,3 +81,17 @@ def delete_sale_endpoint(
         return None
     except NotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get("/by-cedula/{cedula}", response_model=List[schemas.VentaOut])
+def get_sales_by_cedula_endpoint(
+    cedula: str,
+    sale_service: SaleService = Depends(get_sale_service)
+):
+    """
+    Obtiene todas las ventas asociadas a una cédula de cliente específica.
+    """
+    try:
+        return sale_service.get_sales_by_cedula(cedula)
+    except NotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

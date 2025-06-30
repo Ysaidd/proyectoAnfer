@@ -144,3 +144,20 @@ class SaleService:
         sale = self.get_sale_by_id(sale_id)
         self.db.delete(sale)
         self.db.commit()
+
+    # Agrega este método a la clase SaleService
+    def get_sales_by_cedula(self, cedula: str) -> List[models.Venta]:
+        """
+        Obtiene todas las ventas asociadas a una cédula de cliente específica.
+        """
+        cliente = self.db.query(user_models.User).filter(user_models.User.cedula == cedula).first()
+        if not cliente:
+            raise NotFoundException(f"Cliente con cédula '{cedula}' no encontrado.")
+        
+        # Cargamos detalles, variante y producto para la respuesta
+        ventas = self.db.query(models.Venta).options(
+            joinedload(models.Venta.detalles).joinedload(models.DetalleVenta.variante).joinedload(product_models.VarianteProducto.producto),
+            joinedload(models.Venta.cliente)
+        ).filter(models.Venta.cliente_id == cliente.id).all()
+        
+        return ventas

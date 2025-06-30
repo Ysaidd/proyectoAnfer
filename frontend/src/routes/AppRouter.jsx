@@ -16,6 +16,7 @@ import AdminPedidos from "../pages/AdminPedidos";
 import RegisterForm from "../pages/Auth/register";
 import LoginForm from "../pages/Auth/login";
 import ProtectedRoute from "../routes/ProtectedRouter"; // Asegúrate que la ruta sea correcta
+import UserProfile from "../pages/UserProfile";
 
 const AppRouter = () => {
     return (
@@ -36,6 +37,7 @@ const AppRouter = () => {
                 <Route path="product/:productId" element={<ProductPage />} />
                 <Route path="register" element={<RegisterForm/>} />
                 <Route path="login" element={<LoginForm/>} />
+                <Route path="perfil" element={<UserProfile/>} />
                 {/* <Route 
                     path="my-account" 
                     element={

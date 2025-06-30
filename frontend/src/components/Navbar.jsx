@@ -11,6 +11,7 @@ const Navbar = () => {
           <li><Link to="/" className="hover:underline">Inicio</Link></li>
           <li><Link to="/products" className="hover:underline">Productos</Link></li>
           <li><Link to="/cart" className="hover:underline">Carrito</Link></li>
+          <li><Link to="/login" className="hover:underline">Iniciar Sesion</Link></li>
         </ul>
       </div>
     </nav>

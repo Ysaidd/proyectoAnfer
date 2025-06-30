@@ -12,13 +12,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def create_db_tables():
-    """
-    Crea todas las tablas definidas en los modelos de SQLAlchemy que han sido cargados.
-    Esta función debe ser llamada después de que todos los modelos de la aplicación
-    (ej. User, Product) hayan sido importados en algún lugar del código,
-    para que Base.metadata conozca todas las tablas a crear.
-    """
-    print("Intentando crear tablas en la base de datos...")
+
     Base.metadata.create_all(bind=engine)
     print("Tablas verificadas/creadas exitosamente.")
 
