@@ -42,7 +42,7 @@ const StorePage = () => {
   
     if (searchTerm) {
       filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
   
