@@ -51,91 +51,78 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Link 
+            to="/" 
+            className="flex items-center space-x-2 transition-all duration-300 hover:transform hover:scale-105"
           >
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-2xl">👔</span>
-              </div>
-              <span className={`text-2xl font-bold ${isScrolled ? 'text-indigo-600' : 'text-white'}`}>
-                Anfer
-              </span>
-            </Link>
-          </motion.div>
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <span className="text-2xl">👔</span>
+            </div>
+            <span className={`text-2xl font-bold ${isScrolled ? 'text-indigo-600' : 'text-white'}`}>
+              Anfer
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <motion.div
+              <Link
                 key={item.path}
-                whileHover={{ y: -2 }}
-                whileTap={{ y: 0 }}
+                to={item.path}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:transform hover:-translate-y-0.5 ${
+                  isActive(item.path)
+                    ? isScrolled
+                      ? 'bg-indigo-100 text-indigo-600'
+                      : 'bg-white/20 text-white'
+                    : isScrolled
+                      ? 'text-gray-700 hover:bg-gray-100'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
               >
-                <Link
-                  to={item.path}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                    isActive(item.path)
-                      ? isScrolled
-                        ? 'bg-indigo-100 text-indigo-600'
-                        : 'bg-white/20 text-white'
-                      : isScrolled
-                        ? 'text-gray-700 hover:bg-gray-100'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              </motion.div>
+                <span className="text-lg">{item.icon}</span>
+                <span className="font-medium">{item.label}</span>
+              </Link>
             ))}
 
             {/* Auth Section */}
             <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-white/20">
               {!isAuthenticated ? (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link
-                    to="/login"
-                    className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
-                      isScrolled
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-white text-indigo-600 hover:bg-white/90'
-                    }`}
-                  >
-                    Iniciar Sesión
-                  </Link>
-                </motion.div>
+                <Link
+                  to="/login"
+                  className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:transform hover:scale-105 ${
+                    isScrolled
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      : 'bg-white text-indigo-600 hover:bg-white/90'
+                  }`}
+                >
+                  Iniciar Sesión
+                </Link>
               ) : (
                 <div className="flex items-center space-x-4">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      to="/perfil"
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                        isScrolled
-                          ? 'text-gray-700 hover:bg-gray-100'
-                          : 'text-white/80 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      <span className="text-lg">👤</span>
-                      <span className="font-medium">Perfil</span>
-                    </Link>
-                  </motion.div>
+                  <Link
+                    to="/perfil"
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:transform hover:-translate-y-0.5 ${
+                      isScrolled
+                        ? 'text-gray-700 hover:bg-gray-100'
+                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="text-lg">👤</span>
+                    <span className="font-medium">Perfil</span>
+                  </Link>
                   
                   {userRole === 'admin' || userRole === 'manager' ? (
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Link
-                        to="/admin"
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                          isScrolled
-                            ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
-                            : 'bg-white/20 text-white hover:bg-white/30'
-                        }`}
-                      >
-                        <span className="text-lg">⚙️</span>
-                        <span className="font-medium">Admin</span>
-                      </Link>
-                    </motion.div>
+                    <Link
+                      to="/admin"
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:transform hover:-translate-y-0.5 ${
+                        isScrolled
+                          ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                          : 'bg-white/20 text-white hover:bg-white/30'
+                      }`}
+                    >
+                      <span className="text-lg">⚙️</span>
+                      <span className="font-medium">Admin</span>
+                    </Link>
                   ) : null}
                   
                   <LogoutButton />
