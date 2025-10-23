@@ -1,53 +1,90 @@
 // ProductCard.jsx
 import React from "react";
-import BtnViaWhatsapp from "./BtnVIaWhatsapp";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
   // Esta función es la que genera la URL COMPLETA y correcta para la imagen.
-  // Es tu "imagen" en el sentido de cómo se accede al recurso visual.
   const getImageUrl = (imagePath) => {
     if (!imagePath) {
-      // Si no hay ruta de imagen, muestra un SVG de placeholder.
       return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
     }
-    // Aseguramos que la ruta comience con 'images/' si es lo que devuelve el backend
-    // y luego le anteponemos la URL base de tu servidor estático.
     const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
     const fullUrl = `http://localhost:8000/static/${cleanPath}`;
     return fullUrl;
   };
 
-  // Esta función maneja el caso de que la imagen no cargue, mostrando el placeholder.
   const handleImageError = (e) => {
     e.target.onerror = null;
-    e.target.src = getImageUrl(null); // Usa la función para obtener el placeholder
+    e.target.src = getImageUrl(null);
   };
 
   return (
-    <div className="border rounded-lg p-4 shadow-lg text-center ">
-      <img
-        // Aquí es donde se usa la función `getImageUrl` para que el navegador
-        // sepa dónde encontrar el archivo de la imagen.
-        src={getImageUrl(product.image_url)} // <-- ¡Esta línea es la clave!
-        alt={product.nombre} // Usamos 'nombre' para consistencia.
-        className="w-full h-64 object-cover mx-auto cursor-pointer"
-        onClick={() => navigate(`/product/${product.id}`)}
-        onError={handleImageError} // Si falla al cargar, muestra el placeholder.
-      />
-      <h3 className="font-semibold mt-3" onClick={() => navigate(`/product/${product.id}`)}>{product.nombre}</h3>
-      <p className="pb-3 text-blue-600 font-bold">${product.precio?.toFixed(2) || 'N/A'}</p>
-      <button
-        className="w-full block bg-indigo-900 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition text-center"
-        onClick={() => navigate(`/product/${product.id}`)}
-      >
-        Ver Producto
-      </button>
-      {/* Si BtnViaWhatsapp es necesario, asegúrate de que sus props sean correctas. */}
-      {/* <BtnViaWhatsapp product={product} /> */}
-    </div>
+    <motion.div 
+      className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500"
+      whileHover={{ y: -8 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Image Container */}
+      <div className="relative h-64 overflow-hidden">
+        <img
+          src={getImageUrl(product.image_url)}
+          alt={product.nombre}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer"
+          onClick={() => navigate(`/product/${product.id}`)}
+          onError={handleImageError}
+        />
+        
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
+        
+        {/* Quick View Button */}
+        <motion.button
+          className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate(`/product/${product.id}`)}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </motion.button>
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 
+          className="font-bold text-lg text-gray-900 mb-2 cursor-pointer hover:text-indigo-600 transition-colors duration-300"
+          onClick={() => navigate(`/product/${product.id}`)}
+        >
+          {product.nombre}
+        </h3>
+        
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-2xl font-bold text-indigo-600">
+            ${product.precio?.toFixed(2) || 'N/A'}
+          </span>
+          <div className="flex items-center text-yellow-400">
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+            </svg>
+            <span className="ml-1 text-sm text-gray-600">4.8</span>
+          </div>
+        </div>
+
+        <motion.button
+          className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate(`/product/${product.id}`)}
+        >
+          Ver Producto
+        </motion.button>
+      </div>
+    </motion.div>
   );
 };
 

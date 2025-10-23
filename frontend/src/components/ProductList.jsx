@@ -1,44 +1,59 @@
 // ProductList.jsx
 import React from "react";
+import { motion } from "framer-motion";
 import ProductCard from "./ProductCard";
 
 const ProductList = ({ products }) => {
-  return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Productos Disponibles</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/*
-          ⚠️ CORRECCIÓN AQUÍ: Este bloque de código estaba intentando renderizar
-          una imagen fuera del bucle de mapeo, lo cual era incorrecto
-          porque 'products' es un array, no un producto individual en este punto.
-          Ha sido ELIMINADO para simplificar ProductList.
-        */}
-        {/*
-        {products.image_url ? (
-          <img
-            src={getImageUrl(products.image_url)}
-            alt={products.nombre}
-            className="w-16 h-16 object-cover rounded-md"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
-            }}
-          />
-        ) : (
-          <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-md">
-            <span className="text-gray-500 text-xs text-center">Sin imagen</span>
-          </div>
-        )}
-        */}
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
 
-        {(products || []).map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-          />
-        ))}
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-6xl mb-4">🛍️</div>
+        <h3 className="text-xl font-semibold text-gray-600 mb-2">No hay productos disponibles</h3>
+        <p className="text-gray-500">Pronto tendremos nuevos productos para ti</p>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+    >
+      {products.map((product, index) => (
+        <motion.div
+          key={product.id}
+          variants={itemVariants}
+          whileHover={{ y: -5 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ProductCard product={product} />
+        </motion.div>
+      ))}
+    </motion.div>
   );
 };
 
