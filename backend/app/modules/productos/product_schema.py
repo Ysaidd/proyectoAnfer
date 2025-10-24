@@ -13,11 +13,9 @@ class ProductSimpleResponse(BaseModel):
     nombre: str
     descripcion: str
     precio: float
-    categoria_id: int
     proveedor_id: int 
 
-
-    categoria: Optional[CategoriaResponse] = None
+    categorias: Optional[List[CategoriaResponse]] = None
     proveedor: Optional[ProveedorResponse] = None
 
     model_config = ConfigDict(
@@ -55,19 +53,19 @@ class ProductBase(BaseModel):
     image_url: Optional[str] = None
 
 class ProductCreate(ProductBase):
-    categoria_id: int
+    categoria_ids: List[int] = Field(..., min_items=1, description="Lista de IDs de categorías")
     proveedor_id: int
     variantes: List[VarianteProductoCreate]
 
 
 class ProductUpdate(ProductBase):
-    categoria_id: int
-    proveedor_id: int
+    categoria_ids: Optional[List[int]] = Field(None, min_items=1, description="Lista de IDs de categorías")
+    proveedor_id: Optional[int] = None
 
 
 class ProductResponse(ProductBase):
     id: int
-    categoria: CategoriaResponse
+    categorias: List[CategoriaResponse]
     variantes: List[VarianteProductoResponse] # Aquí sí queremos todas las variantes
     proveedor: Optional[ProveedorResponse] = None
     image_url: Optional[str] = None

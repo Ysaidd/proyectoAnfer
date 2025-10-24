@@ -40,7 +40,7 @@ class ProductService:
         product = self.db.query(models.Producto)\
             .options(
                 joinedload(models.Producto.variantes),
-                joinedload(models.Producto.categoria),
+                joinedload(models.Producto.categorias),
                 joinedload(models.Producto.proveedor)
             )\
             .filter(models.Producto.id == producto_id)\
@@ -55,20 +55,39 @@ class ProductService:
         return self.db.query(models.Producto)\
             .options(
                 joinedload(models.Producto.variantes),
-                joinedload(models.Producto.categoria),
+                joinedload(models.Producto.categorias),
                 joinedload(models.Producto.proveedor)
             )\
+            .all()
+
+    def get_products_by_categories(self, categoria_ids: List[int]) -> List[models.Producto]:
+        logger.info(f"Obteniendo productos por categorías: {categoria_ids}")
+        return self.db.query(models.Producto)\
+            .join(models.Producto.categorias)\
+            .filter(categoria_models.Categoria.id.in_(categoria_ids))\
+            .options(
+                joinedload(models.Producto.variantes),
+                joinedload(models.Producto.categorias),
+                joinedload(models.Producto.proveedor)
+            )\
+            .distinct()\
             .all()
 
     # --- MÉTODO create_product (SOLO UNA VEZ, LA PRIMERA DEFINICIÓN) ---
     def create_product(self, product_data: schemas.ProductCreate) -> models.Producto:
         logger.info(f"Creando nuevo producto: {product_data.nombre}")
-        # Validaciones de existencia de categoria y proveedor
-        categoria = self.db.query(categoria_models.Categoria).filter_by(id=product_data.categoria_id).first()
-        if not categoria:
-            logger.error(f"Categoría con ID {product_data.categoria_id} no encontrada para crear producto.")
-            raise HTTPException(status_code=404, detail="Categoría no encontrada")
         
+        # Validaciones de existencia de categorías
+        categorias = self.db.query(categoria_models.Categoria).filter(
+            categoria_models.Categoria.id.in_(product_data.categoria_ids)
+        ).all()
+        
+        if len(categorias) != len(product_data.categoria_ids):
+            missing_ids = set(product_data.categoria_ids) - {cat.id for cat in categorias}
+            logger.error(f"Categorías con IDs {missing_ids} no encontradas para crear producto.")
+            raise HTTPException(status_code=404, detail=f"Categorías con IDs {missing_ids} no encontradas")
+        
+        # Validación de existencia de proveedor
         proveedor = self.db.query(proveedor_models.Proveedor).filter_by(id=product_data.proveedor_id).first()
         if not proveedor:
             logger.error(f"Proveedor con ID {product_data.proveedor_id} no encontrado para crear producto.")
@@ -78,10 +97,13 @@ class ProductService:
             nombre=product_data.nombre,
             descripcion=product_data.descripcion,
             precio=product_data.precio,
-            categoria_id=product_data.categoria_id,
             proveedor_id=product_data.proveedor_id,
             image_url=product_data.image_url # Esto debería ser None o vacío al crear inicialmente
         )
+        
+        # Asociar categorías al producto
+        new_product.categorias = categorias
+        
         self.db.add(new_product)
         self.db.flush() # Para obtener el ID antes de añadir variantes
 
@@ -97,7 +119,7 @@ class ProductService:
         self.db.commit()
         self.db.refresh(new_product)
         # Refresca las relaciones para que la respuesta contenga todos los datos
-        self.db.refresh(new_product, attribute_names=["variantes", "categoria", "proveedor"])
+        self.db.refresh(new_product, attribute_names=["variantes", "categorias", "proveedor"])
         logger.info(f"Producto '{new_product.nombre}' creado con ID: {new_product.id}")
         return new_product
 
@@ -106,21 +128,29 @@ class ProductService:
         product = self.get_product_by_id(product_id) # Usa el método que carga las relaciones
 
         for field, value in update_data.model_dump(exclude_unset=True).items(): # .model_dump() para Pydantic v2
-            # Actualizar category_id o proveedor_id también
-            if field == "categoria_id":
-                categoria = self.db.query(categoria_models.Categoria).filter_by(id=value).first()
-                if not categoria:
-                    raise HTTPException(status_code=404, detail="Nueva categoría no encontrada")
+            # Actualizar categorías si se proporcionan
+            if field == "categoria_ids":
+                categorias = self.db.query(categoria_models.Categoria).filter(
+                    categoria_models.Categoria.id.in_(value)
+                ).all()
+                
+                if len(categorias) != len(value):
+                    missing_ids = set(value) - {cat.id for cat in categorias}
+                    raise HTTPException(status_code=404, detail=f"Categorías con IDs {missing_ids} no encontradas")
+                
+                product.categorias = categorias
+            # Actualizar proveedor_id si se proporciona
             elif field == "proveedor_id":
                 proveedor = self.db.query(proveedor_models.Proveedor).filter_by(id=value).first()
                 if not proveedor:
                     raise HTTPException(status_code=404, detail="Nuevo proveedor no encontrado")
-            
-            setattr(product, field, value)
+                setattr(product, field, value)
+            else:
+                setattr(product, field, value)
 
         self.db.commit()
         self.db.refresh(product)
-        self.db.refresh(product, attribute_names=["variantes", "categoria", "proveedor"]) # Asegurar que se refrescan las relaciones
+        self.db.refresh(product, attribute_names=["variantes", "categorias", "proveedor"]) # Asegurar que se refrescan las relaciones
         logger.info(f"Producto {product_id} actualizado.")
         return product
 
@@ -195,7 +225,7 @@ class ProductService:
         self.db.commit()
         self.db.refresh(product)
         # Asegurarse de que las relaciones se refresquen para la respuesta
-        self.db.refresh(product, attribute_names=["variantes", "categoria", "proveedor"])
+        self.db.refresh(product, attribute_names=["variantes", "categorias", "proveedor"])
         logger.info(f"Producto {product_id} actualizado con image_url: {product.image_url}")
         return product
 

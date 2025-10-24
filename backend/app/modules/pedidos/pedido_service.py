@@ -152,7 +152,7 @@ class PedidoService:
                  .options(
                      joinedload(models.Pedido.proveedor), # Carga el proveedor del pedido
                      # Carga los detalles, su variante, el producto de la variante, la categoría y el proveedor del producto
-                     joinedload(models.Pedido.detalles).joinedload(models.DetallePedido.variante).joinedload(product_models.VarianteProducto.producto).joinedload(product_models.Producto.categoria),
+                     joinedload(models.Pedido.detalles).joinedload(models.DetallePedido.variante).joinedload(product_models.VarianteProducto.producto).joinedload(product_models.Producto.categorias),
                      joinedload(models.Pedido.detalles).joinedload(models.DetallePedido.variante).joinedload(product_models.VarianteProducto.producto).joinedload(product_models.Producto.proveedor)
                  )\
                  .offset(skip).limit(limit).all()

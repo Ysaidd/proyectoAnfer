@@ -63,6 +63,20 @@ const ProductCard = ({ product }) => {
           {product.nombre}
         </h3>
         
+        {/* Categories */}
+        {product.categorias && product.categorias.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {product.categorias.map((category, index) => (
+              <span
+                key={category.id || index}
+                className="bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full text-xs font-medium"
+              >
+                {category.name}
+              </span>
+            ))}
+          </div>
+        )}
+        
         <div className="flex items-center justify-between mb-4">
           <span className="text-2xl font-bold text-indigo-600">
             ${product.precio?.toFixed(2) || 'N/A'}

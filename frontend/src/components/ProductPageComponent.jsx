@@ -265,6 +265,20 @@ const ProductPageComponent = () => {
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.nombre}</h1>
             
+            {/* Categories */}
+            {product.categorias && product.categorias.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {product.categorias.map((category, index) => (
+                  <span
+                    key={category.id || index}
+                    className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium"
+                  >
+                    {category.name}
+                  </span>
+                ))}
+              </div>
+            )}
+            
             {/* Rating */}
             <div className="flex items-center space-x-2 mb-4">
               <div className="flex items-center">

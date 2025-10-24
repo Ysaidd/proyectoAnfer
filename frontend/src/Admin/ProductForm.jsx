@@ -8,7 +8,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
           name: product.nombre || "",
           description: product.descripcion || "",
           price: product.precio || 0,
-          category_id: product.categoria?.id || "",
+          categoria_ids: product.categorias?.map(cat => cat.id) || [],
           proveedor_id: product.proveedor?.id || "",
           variants: product.variantes || [],
         }
@@ -16,7 +16,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
           name: "",
           description: "",
           price: 0,
-          category_id: "",
+          categoria_ids: [],
           proveedor_id: "",
           variants: [],
         }
@@ -27,9 +27,9 @@ const ProductForm = ({ product, onClose, onSave }) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [categories, setCategories] = useState([]);
-  // *** CAMBIO CRÍTICO AQUÍ: Usar product?.categoria?.name para inicializar searchCategory
-  const [searchCategory, setSearchCategory] = useState(product?.categoria?.name || "");
+  const [searchCategory, setSearchCategory] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const [providers, setProviders] = useState([]);
   const [searchProvider, setSearchProvider] = useState(product?.proveedor?.nombre || "");
@@ -48,13 +48,11 @@ const ProductForm = ({ product, onClose, onSave }) => {
       })
       .then((data) => {
         setCategories(data);
-        if (product && product.categoria) {
-          const initialCategory = data.find((cat) => cat.id === product.categoria.id);
-          if (initialCategory) {
-            // *** CAMBIO CRÍTICO AQUÍ: Usar initialCategory.name
-            setSearchCategory(initialCategory.name);
-            setFormData((prev) => ({ ...prev, category_id: initialCategory.id }));
-          }
+        if (product && product.categorias) {
+          const initialCategories = data.filter((cat) => 
+            product.categorias.some(productCat => productCat.id === cat.id)
+          );
+          setSelectedCategories(initialCategories);
         }
       })
       .catch((error) => console.error("Error cargando categorías:", error));
@@ -81,14 +79,14 @@ const ProductForm = ({ product, onClose, onSave }) => {
     // Lógica de filtrado de categorías
     if (searchCategory && categories.length > 0) {
       const filtered = categories.filter((cat) =>
-        // *** CAMBIO CRÍTICO AQUÍ: Usar cat.name y su toLowerCase()
-        cat.name && cat.name.toLowerCase().includes(searchCategory.toLowerCase())
+        cat.name && cat.name.toLowerCase().includes(searchCategory.toLowerCase()) &&
+        !selectedCategories.some(selected => selected.id === cat.id)
       );
       setFilteredCategories(filtered);
     } else {
       setFilteredCategories([]);
     }
-  }, [searchCategory, categories]);
+  }, [searchCategory, categories, selectedCategories]);
 
   useEffect(() => {
     // Lógica de filtrado de proveedores (este ya funcionaba bien)
@@ -108,10 +106,23 @@ const ProductForm = ({ product, onClose, onSave }) => {
   };
 
   const handleSelectCategory = (category) => {
-    setFormData({ ...formData, category_id: category.id });
-    // *** CAMBIO CRÍTICO AQUÍ: Usar category.name
-    setSearchCategory(category.name);
+    const newSelectedCategories = [...selectedCategories, category];
+    setSelectedCategories(newSelectedCategories);
+    setFormData({ 
+      ...formData, 
+      categoria_ids: newSelectedCategories.map(cat => cat.id) 
+    });
+    setSearchCategory("");
     setFilteredCategories([]);
+  };
+
+  const handleRemoveCategory = (categoryToRemove) => {
+    const newSelectedCategories = selectedCategories.filter(cat => cat.id !== categoryToRemove.id);
+    setSelectedCategories(newSelectedCategories);
+    setFormData({ 
+      ...formData, 
+      categoria_ids: newSelectedCategories.map(cat => cat.id) 
+    });
   };
 
   const handleSelectProvider = (provider) => {
@@ -196,11 +207,11 @@ const ProductForm = ({ product, onClose, onSave }) => {
       !formData.name ||
       !formData.description ||
       formData.price <= 0 ||
-      !formData.category_id ||
+      formData.categoria_ids.length === 0 ||
       !formData.proveedor_id
     ) {
       alert(
-        "Por favor, rellena todos los campos obligatorios (Nombre, Descripción, Precio, Categoría, Proveedor)."
+        "Por favor, rellena todos los campos obligatorios (Nombre, Descripción, Precio, al menos una Categoría, Proveedor)."
       );
       return;
     }
@@ -213,7 +224,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
       nombre: formData.name,
       descripcion: formData.description,
       precio: parseFloat(formData.price),
-      categoria_id: parseInt(formData.category_id),
+      categoria_ids: formData.categoria_ids,
       proveedor_id: parseInt(formData.proveedor_id),
       variantes: formData.variants,
     };
@@ -297,7 +308,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
         />
 
         {/* --- Buscador de categorías --- */}
-        <label className="block text-gray-700">Categoría</label>
+        <label className="block text-gray-700">Categorías</label>
         <input
           type="text"
           placeholder="Buscar categoría..."
@@ -315,7 +326,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
                 onClick={() => handleSelectCategory(category)}
                 className="p-2 hover:bg-gray-200 cursor-pointer"
               >
-                {category.name} {/* *** CAMBIO CRÍTICO AQUÍ: Usar category.name */}
+                {category.name}
               </li>
             ))}
           </ul>
@@ -325,6 +336,30 @@ const ProductForm = ({ product, onClose, onSave }) => {
         )}
         {!searchCategory && categories.length > 0 && (
             <p className="text-sm text-gray-500 mb-2">Empieza a escribir para buscar categorías.</p>
+        )}
+
+        {/* Categorías seleccionadas */}
+        {selectedCategories.length > 0 && (
+          <div className="mb-3">
+            <p className="text-sm text-gray-600 mb-2">Categorías seleccionadas:</p>
+            <div className="flex flex-wrap gap-2">
+              {selectedCategories.map((category) => (
+                <span
+                  key={category.id}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                >
+                  {category.name}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCategory(category)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
 

@@ -11,7 +11,8 @@ const StorePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null); 
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -50,11 +51,17 @@ const StorePage = () => {
   useEffect(() => {
     let filtered = products;
   
-    if (selectedCategory) {
+    if (selectedCategories.length > 0) {
       filtered = filtered.filter((p) => {
-        // Manejar diferentes estructuras de categoría
-        let productCategory = null;
+        // Verificar si el producto tiene alguna de las categorías seleccionadas
+        if (p.categorias && Array.isArray(p.categorias)) {
+          return p.categorias.some(productCategory => 
+            selectedCategories.some(selectedCat => selectedCat.name === productCategory.name)
+          );
+        }
         
+        // Fallback para estructura antigua (compatibilidad)
+        let productCategory = null;
         if (typeof p.category === "string") {
           productCategory = p.category;
         } else if (p.category && typeof p.category === "object") {
@@ -63,14 +70,7 @@ const StorePage = () => {
           productCategory = typeof p.categoria === "string" ? p.categoria : p.categoria.name;
         }
         
-        console.log("Filtrando:", { 
-          productName: p.nombre, 
-          productCategory, 
-          selectedCategory, 
-          match: productCategory === selectedCategory 
-        });
-        
-        return productCategory === selectedCategory;
+        return selectedCategories.some(selectedCat => selectedCat.name === productCategory);
       });
     }
   
@@ -82,8 +82,24 @@ const StorePage = () => {
   
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [products, selectedCategory, searchTerm]);
+  }, [products, selectedCategories, searchTerm]);
   
+  const handleCategoryToggle = (category) => {
+    setSelectedCategories(prev => {
+      const isSelected = prev.some(cat => cat.name === category.name);
+      if (isSelected) {
+        return prev.filter(cat => cat.name !== category.name);
+      } else {
+        return [...prev, category];
+      }
+    });
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSearchTerm("");
+  };
+
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedProducts = filteredProducts.slice(
@@ -173,6 +189,11 @@ const StorePage = () => {
               {categories.map((cat, index) => {
                 // Contar productos en esta categoría
                 const categoryCount = products.filter(p => {
+                  if (p.categorias && Array.isArray(p.categorias)) {
+                    return p.categorias.some(productCategory => productCategory.name === cat.name);
+                  }
+                  
+                  // Fallback para estructura antigua
                   let productCategory = null;
                   if (typeof p.category === "string") {
                     productCategory = p.category;
@@ -184,12 +205,14 @@ const StorePage = () => {
                   return productCategory === cat.name;
                 }).length;
 
+                const isSelected = selectedCategories.some(selectedCat => selectedCat.name === cat.name);
+
                 return (
                   <motion.button
                     key={cat.name}
-                    onClick={() => setSelectedCategory(cat.name)}
+                    onClick={() => handleCategoryToggle(cat)}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 ${
-                      selectedCategory === cat.name
+                      isSelected
                         ? 'bg-indigo-100 text-indigo-600 font-semibold'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
@@ -197,7 +220,12 @@ const StorePage = () => {
                     transition={{ duration: 0.2, delay: index * 0.05 }}
                   >
                     <span className="flex items-center justify-between">
-                      <span>{cat.name}</span>
+                      <span className="flex items-center gap-2">
+                        {isSelected && (
+                          <span className="text-indigo-600">✓</span>
+                        )}
+                        {cat.name}
+                      </span>
                       <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full text-xs">
                         {categoryCount}
                       </span>
@@ -233,10 +261,7 @@ const StorePage = () => {
               </div>
               
               <motion.button
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setSearchTerm("");
-                }}
+                onClick={clearAllFilters}
                 className="px-6 py-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -251,10 +276,17 @@ const StorePage = () => {
                 Mostrando {paginatedProducts.length} de {filteredProducts.length} productos
                 {totalPages > 1 && ` (Página ${currentPage} de ${totalPages})`}
               </p>
-              {selectedCategory && (
-                <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">
-                  {selectedCategory}
-                </span>
+              {selectedCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedCategories.map((category) => (
+                    <span 
+                      key={category.name}
+                      className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium"
+                    >
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -262,7 +294,7 @@ const StorePage = () => {
           {/* Products Grid */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={`${selectedCategory}-${searchTerm}-${currentPage}`}
+              key={`${selectedCategories.map(c => c.name).join(',')}-${searchTerm}-${currentPage}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}

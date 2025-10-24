@@ -3,9 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.config import settings
 
-SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True) # `echo=True` para ver las queries SQL
+engine = create_engine(DATABASE_URL, echo=True) # `echo=True` para ver las queries SQL
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

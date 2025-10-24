@@ -222,7 +222,20 @@ const Products = () => {
                         rowSpan={product.variantes?.length || 1}
                         className="border border-gray-700 p-3 align-middle font-medium"
                       >
-                        {product.categoria?.name || "Sin categoría"} {/* Usar product.categoria.name directamente */}
+                        {product.categorias && product.categorias.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {product.categorias.map((category, index) => (
+                              <span
+                                key={category.id || index}
+                                className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs"
+                              >
+                                {category.name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          "Sin categoría"
+                        )}
                       </td>
                       <td
                         rowSpan={product.variantes?.length || 1}

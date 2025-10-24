@@ -1,8 +1,8 @@
 # app/modules/products/product_router.py
 
-from fastapi import APIRouter, Depends, status, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, status, File, UploadFile, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.modules.productos import product_schema as schemas
 from app.modules.productos.product_service import ProductService # Asegúrate de que esto apunta al archivo correcto
 from app.core.dependencies import get_db # Asegúrate de que get_db está bien definido aquí
@@ -22,8 +22,11 @@ def create_product_endpoint(
 
 @router.get("/", response_model=List[schemas.ProductResponse])
 def list_products_endpoint(
+    categoria_ids: Optional[List[int]] = Query(None, description="Lista de IDs de categorías para filtrar"),
     product_service: ProductService = Depends(get_product_service)
 ):
+    if categoria_ids:
+        return product_service.get_products_by_categories(categoria_ids)
     return product_service.get_all_products()
 
 @router.get("/{product_id}", response_model=schemas.ProductResponse)
