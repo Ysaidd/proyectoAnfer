@@ -64,6 +64,19 @@ app.include_router(pedido_router)
 app.include_router(proveedor_router)
 app.include_router(sales_router)
 
+@app.get("/_admin/create-all-tables")
+def create_tables():
+    """
+    Endpoint temporal y secreto para crear las tablas en la BD.
+    """
+    try:
+        # Esta línea le dice a SQLAlchemy: 
+        # "mira todos los modelos que definí y créalos como tablas en la BD"
+        Base.metadata.create_all(bind=engine)
+        return {"message": "¡Tablas creadas exitosamente!"}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 @app.get("/")
 def read_root():
