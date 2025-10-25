@@ -78,6 +78,60 @@ def create_tables():
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/_admin/create-first-admin")
+def create_first_admin_endpoint():
+    """
+    Endpoint temporal para ejecutar el script create_first_admin.
+    """
+    print("🚀 Iniciando proceso de creación de administrador...")
+
+    # Usamos 'with' para que la sesión (db) se cierre sola
+    try:
+        with SessionLocal() as db:
+            user_service = UserService(db)
+            admin_email = "admin@gmail.com"
+            admin_password = "admin123"
+            cedula = "12345678"
+
+            print(f"Verificando si el usuario '{admin_email}' ya existe...")
+
+            # 1. Verificar si existe
+            try:
+                existing_admin = user_service.get_user_by_email(admin_email)
+                if existing_admin:
+                    print(f"✅ El usuario administrador '{admin_email}' ya existe. Saltando creación.")
+                    return {"message": f"El usuario administrador '{admin_email}' ya existe. No se hizo nada."}
+            except Exception as e:
+                # Si falla la búsqueda, lo reportamos
+                print(f"⚠️  No se pudo verificar usuario: {e}")
+                # Continuamos, puede que la tabla estuviera vacía y diera un error esperado
+
+            # 2. Si no existe, crearlo
+            print("Creando usuario administrador...")
+            admin_user_data = UserCreate(
+                email=admin_email,
+                cedula=cedula,
+                password=admin_password,
+                full_name="Super Administrador",
+                role=UserRole.ADMIN
+            )
+
+            user_service.create_user(admin_user_data)
+
+            print(f"✅ Usuario administrador '{admin_email}' creado exitosamente!")
+            return {
+                "message": "¡Usuario administrador creado exitosamente!",
+                "email": admin_email,
+                "password": admin_password
+            }
+
+    except Exception as e:
+        # Captura cualquier otro error
+        print(f"❌ Error inesperado: {e}")
+        return {
+            "error": f"Error inesperado al crear admin: {str(e)}",
+            "traceback": traceback.format_exc() # Esto nos da el error completo
+        }
 
 @app.get("/")
 def read_root():
