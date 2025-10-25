@@ -19,6 +19,8 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.database import Base, engine
 import traceback
+from app.database import SessionLocal
+
 
 create_db_tables()
 app = FastAPI(
