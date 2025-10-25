@@ -1,6 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
+const fetchBannerData = async () => {
+    const response = await fetch(`${API_URL}/banner-data`); // Llamada a la API actualizada
+    const data = await response.json();
+    return data;
+};
+
 const Banner = () => {
   return (
     <div

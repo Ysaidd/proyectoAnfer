@@ -3,6 +3,14 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
+const fetchCarouselData = async () => {
+    const response = await fetch(`${API_URL}/carousel-data`); // Llamada a la API actualizada
+    const data = await response.json();
+    return data;
+};
+
 const images = [
   {
     src: "/images/prueba.jpg",

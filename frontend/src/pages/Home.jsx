@@ -6,13 +6,15 @@ import BtnVerTienda from "../components/BtnVerTienda";
 import Banner from "../components/Banner";
 import ProductList from "../components/ProductList";
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
 const Home = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // 🔥 Llamar a la API para obtener 3 productos
-        fetch("http://localhost:8000/products?limit=3")  
+        fetch(`${API_URL}/products?limit=3`)  // Llamada a la API actualizada
             .then((response) => response.json())
             .then((data) => {
                 setProducts(data);  // Guardar los productos en el estado

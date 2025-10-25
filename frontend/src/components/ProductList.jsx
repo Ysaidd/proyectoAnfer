@@ -3,6 +3,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import ProductCard from "./ProductCard";
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
 const ProductList = ({ products }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -24,6 +26,12 @@ const ProductList = ({ products }) => {
         ease: "easeOut"
       }
     }
+  };
+
+  const fetchProducts = async () => {
+    const response = await fetch(`${API_URL}/products`); // Llamada a la API actualizada
+    const data = await response.json();
+    return data;
   };
 
   if (!products || products.length === 0) {

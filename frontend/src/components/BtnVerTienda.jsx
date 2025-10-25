@@ -1,7 +1,15 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
 const BtnVerTienda = () => {
+    const handleButtonClick = async () => {
+        const response = await fetch(`${API_URL}/store-info`); // Llamada a la API actualizada
+        const data = await response.json();
+        // ...handle data...
+    };
+
     return (
         <div className="w-full text-center py-8">
             <motion.div
@@ -18,6 +26,7 @@ const BtnVerTienda = () => {
                         }}
                         whileTap={{ scale: 0.95 }}
                         transition={{ duration: 0.2 }}
+                        onClick={handleButtonClick}
                     >
                         <span className="flex items-center">
                             Ver Tienda Completa

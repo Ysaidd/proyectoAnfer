@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import CategoryCard from "./CategoryCard";
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
 const Categories = () => {
   const categories = [
     {
@@ -53,6 +55,12 @@ const Categories = () => {
         ease: "easeOut"
       }
     }
+  };
+
+  const fetchCategories = async () => {
+    const response = await fetch(`${API_URL}/categories`); // Llamada a la API actualizada
+    const data = await response.json();
+    return data;
   };
 
   return (
