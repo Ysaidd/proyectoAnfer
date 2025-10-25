@@ -17,6 +17,7 @@ from app.database import create_db_tables
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from app.database import Base, engine
 
 create_db_tables()
 app = FastAPI(
