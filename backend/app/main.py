@@ -20,6 +20,8 @@ from pathlib import Path
 from app.database import Base, engine
 import traceback
 from app.database import SessionLocal
+from app.modules.users.user_service import UserService
+from app.modules.users.user_schema import UserCreate, UserRole
 
 
 create_db_tables()
