@@ -114,7 +114,7 @@ const Sales = () => {
 
       <CreateSale onAddSale={addSale} />
 
-      <div class
+      <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">📋 Listado de Ventas</h2>
         {loading && <div className="text-center p-4 text-blue-600">Cargando ventas...</div>}
         {error && <div className="text-center p-4 text-red-600">{error}</div>}
