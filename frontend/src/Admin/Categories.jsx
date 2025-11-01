@@ -62,13 +62,16 @@ const CategoryManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
 
+
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+  
   useEffect(() => {
     fetchCategories();
   }, []);
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/categorias/');
+      const response = await fetch(`${API_URL}/categorias/`);
       if (!response.ok) throw new Error('Error al cargar categorías');
       const data = await response.json();
       setCategories(data);
@@ -81,7 +84,7 @@ const CategoryManager = () => {
 
   const handleCreateCategory = async (categoryData) => {
     try {
-      const response = await fetch('http://localhost:8000/categorias/', {
+      const response = await fetch(`${API_URL}/categorias/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +101,7 @@ const CategoryManager = () => {
   const handleUpdateCategory = async (categoryData) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/categorias/${editingCategory.id}`,
+        `${API_URL}/categorias/${editingCategory.id}`,
         {
           method: 'PUT',
           headers: {
@@ -117,7 +120,7 @@ const CategoryManager = () => {
   const handleDeleteCategory = async (categoryId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/categorias/${categoryId}`,
+        `${API_URL}/categorias/${categoryId}`,
         {
           method: 'DELETE',
         }

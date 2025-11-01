@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import CreateOrder from "./CreateOrder"; // Asegúrate de que la ruta de importación sea correcta
 
 const Pedidos = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +14,7 @@ const Pedidos = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:8000/pedidos/"); // Tu ruta de API de pedidos
+      const response = await fetch(`${API_URL}/pedidos/`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -60,7 +61,7 @@ const Pedidos = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/pedidos/${orderId}/estado`, {
+      const response = await fetch(`${API_URL}/pedidos/${orderId}/estado`, {
         method: 'PATCH', // Usamos PATCH para actualizar parcialmente (solo el estado)
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +89,7 @@ const Pedidos = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/pedidos/${orderId}`, {
+      const response = await fetch(`${API_URL}/pedidos/${orderId}`, {
         method: 'DELETE',
       });
 

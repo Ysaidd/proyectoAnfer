@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-const VariantForm = ({ variant, onClose, onSave }) => { // Añadido onSave para refrescar la lista
+const VariantForm = ({ variant, onClose, onSave }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API // Añadido onSave para refrescar la lista
   const [formData, setFormData] = useState({
     size: variant?.size || "",
     color: variant?.color || "",
@@ -32,7 +33,7 @@ const VariantForm = ({ variant, onClose, onSave }) => { // Añadido onSave para 
 
     try {
       // *** CORRECCIÓN CLAVE: Endpoint apuntando a /products/variants/{variant.id} ***
-      const response = await fetch(`http://localhost:8000/products/variants/${variant.id}`, {
+      const response = await fetch(`${API_URL}/products/variants/${variant.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         // Mapear formData a la estructura JSON que espera el backend

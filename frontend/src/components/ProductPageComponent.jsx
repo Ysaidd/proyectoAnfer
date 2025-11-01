@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 const ProductPageComponent = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const { productId } = useParams();
   const id = parseInt(productId, 10);
   const { addToCart } = useCart();
@@ -38,9 +39,9 @@ const ProductPageComponent = () => {
       return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
     }
     const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
-    const fullUrl = `http://localhost:8000/static/${cleanPath}`;
+    const fullUrl = `${API_URL}/static/${cleanPath}`;
     return fullUrl;
-  }, []);
+  }, [API_URL]);
 
   const handleImageError = useCallback((e) => {
     e.target.onerror = null;
@@ -50,7 +51,7 @@ const ProductPageComponent = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const apiUrl = `http://localhost:8000/products/${id}`;
+    const apiUrl = `${API_URL}/products/${id}`;
 
     fetch(apiUrl)
       .then((response) => {
@@ -80,7 +81,7 @@ const ProductPageComponent = () => {
         setError(err);
         setLoading(false);
       });
-  }, [id, getImageUrl]);
+  }, [id, getImageUrl, API_URL]);
 
   const handleAddToCart = () => {
     if (!product || !selectedSize || !selectedColor) {

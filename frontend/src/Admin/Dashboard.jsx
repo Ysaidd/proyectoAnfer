@@ -5,6 +5,7 @@ import download from "downloadjs";
 import axios from "axios";
 
 const Dashboard = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const [ventas, setVentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reportRange, setReportRange] = useState("month");
@@ -12,7 +13,7 @@ const Dashboard = () => {
 
   // Configura Axios con la URL base y headers por defecto
   const api = axios.create({
-    baseURL: "http://localhost:8000", // Ajusta según tu backend
+    baseURL: API_URL,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`

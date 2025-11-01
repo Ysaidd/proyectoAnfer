@@ -26,6 +26,8 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
   useEffect(() => {
     if (!cedula) return;
 
@@ -34,7 +36,7 @@ const UserProfile = () => {
       try {
         const token = localStorage.getItem("access_token");
         const response = await fetch(
-          `http://localhost:8000/sales/by-cedula/${cedula}`,
+          `${API_URL}/sales/by-cedula/${cedula}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

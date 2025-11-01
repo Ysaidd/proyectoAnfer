@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ProveedorForm from './ProveedorForm'; // Asegúrate de que la ruta de importación sea correcta
 
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+
 const ProveedorManager = () => {
   const [proveedores, setProveedores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const ProveedorManager = () => {
     setLoading(true);
     setError(''); // Limpiar errores previos
     try {
-      const response = await fetch('http://localhost:8000/proveedores/'); // Asumiendo esta es tu ruta de API
+      const response = await fetch(`${API_URL}/proveedores/`);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Error al cargar proveedores');
@@ -33,7 +35,7 @@ const ProveedorManager = () => {
 
   const handleCreateProveedor = async (proveedorData) => {
     try {
-      const response = await fetch('http://localhost:8000/proveedores/', {
+      const response = await fetch(`${API_URL}/proveedores/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +57,7 @@ const ProveedorManager = () => {
   const handleUpdateProveedor = async (proveedorData) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/proveedores/${editingProveedor.id}`, // Usar el ID del proveedor en edición
+        `${API_URL}/proveedores/${editingProveedor.id}`,
         {
           method: 'PUT',
           headers: {
@@ -82,7 +84,7 @@ const ProveedorManager = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:8000/proveedores/${proveedorId}`,
+        `${API_URL}/proveedores/${proveedorId}`,
         {
           method: 'DELETE',
         }

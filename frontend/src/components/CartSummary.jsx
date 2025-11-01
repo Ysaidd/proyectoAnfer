@@ -6,6 +6,7 @@ import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import download from "downloadjs";
 
 const CartSummary = ({ total, cartItems }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const { clearCart } = useCart();
   const { cedula, userData } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -39,7 +40,7 @@ const CartSummary = ({ total, cartItems }) => {
       setMessage(null);
 
       const token = localStorage.getItem('access_token');
-      const response = await fetch("http://localhost:8000/sales/", {
+      const response = await fetch(`${API_URL}/sales/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

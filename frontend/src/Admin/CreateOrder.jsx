@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 const CreateOrder = ({ onAddOrder, initialOrder, onClose }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   // Estados principales del formulario de pedido
   const [proveedores, setProveedores] = useState([]);
   const [selectedProveedor, setSelectedProveedor] = useState(initialOrder?.proveedor?.id || ""); // O initialOrder?.proveedor_id
@@ -27,13 +28,13 @@ const CreateOrder = ({ onAddOrder, initialOrder, onClose }) => {
     const fetchData = async () => {
       try {
         // Cargar Proveedores
-        const proveedoresResponse = await fetch("http://localhost:8000/proveedores/"); // Tu ruta de API de proveedores
+        const proveedoresResponse = await fetch(`${API_URL}/proveedores/`); // Tu ruta de API de proveedores
         if (!proveedoresResponse.ok) throw new Error(`Error al cargar proveedores: ${proveedoresResponse.status}`);
         const proveedoresData = await proveedoresResponse.json();
         setProveedores(proveedoresData);
 
         // Cargar Productos (con variantes)
-        const productsResponse = await fetch("http://localhost:8000/products"); // Tu ruta de API de productos
+        const productsResponse = await fetch(`${API_URL}/products`); // Tu ruta de API de productos
         if (!productsResponse.ok) throw new Error(`Error al cargar productos: ${productsResponse.status}`);
         const productsData = await productsResponse.json();
         setProducts(productsData);
@@ -214,7 +215,7 @@ const CreateOrder = ({ onAddOrder, initialOrder, onClose }) => {
 
     try {
       const method = initialOrder ? "PUT" : "POST";
-      const url = initialOrder ? `http://localhost:8000/pedidos/${initialOrder.id}` : "http://localhost:8000/pedidos/";
+      const url = initialOrder ? `${API_URL}/pedidos/${initialOrder.id}` : `${API_URL}/pedidos/`;
 
       const response = await fetch(url, {
         method: method,

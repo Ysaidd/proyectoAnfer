@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 const CreateSale = ({ onAddSale }) => {
   // Estados principales del formulario de venta
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const [cedulaCliente, setCedulaCliente] = useState(""); // <-- Volvemos a un solo campo para la cédula
   const [saleStatus, setSaleStatus] = useState("pendiente");
   const [selectedItems, setSelectedItems] = useState([]);
@@ -17,7 +18,7 @@ const CreateSale = ({ onAddSale }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:8000/products");
+        const response = await fetch(`${API_URL}/products`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -192,7 +193,7 @@ const CreateSale = ({ onAddSale }) => {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/sales", {
+      const response = await fetch(`${API_URL}/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(saleData),

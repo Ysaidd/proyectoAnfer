@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const navigate = useNavigate();
 
   // Esta función es la que genera la URL COMPLETA y correcta para la imagen.
@@ -12,7 +13,7 @@ const ProductCard = ({ product }) => {
       return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
     }
     const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
-    const fullUrl = `http://localhost:8000/static/${cleanPath}`;
+    const fullUrl = `${API_URL}/static/${cleanPath}`;
     return fullUrl;
   };
 

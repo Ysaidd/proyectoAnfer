@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 const ImageUploadComponent = ({ productId, onImageUploaded }) => {
+    const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
@@ -42,7 +43,7 @@ const ImageUploadComponent = ({ productId, onImageUploaded }) => {
         formData.append('file', selectedFile); // 'file' debe coincidir con el parámetro en tu router de FastAPI
 
         try {
-            const response = await fetch(`http://localhost:8000/products/${productId}/upload-image`, {
+            const response = await fetch(`${API_URL}/products/${productId}/upload-image`, {
                 method: 'POST',
                 body: formData, // FormData automáticamente establece el Content-Type: multipart/form-data
             });

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 const FormEditPrincipal = ({ product, onClose, onSave }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   // Estado para los datos del formulario principal del producto
   const [formData, setFormData] = useState({
     name: product?.nombre || "", // Asegurarse de usar 'nombre' si ese es el campo del API
@@ -40,7 +41,7 @@ const FormEditPrincipal = ({ product, onClose, onSave }) => {
   // Función para cargar categorías
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8000/categorias");
+      const response = await fetch(`${API_URL}/categorias`);
       if (!response.ok) {
         throw new Error("Error al cargar categorías");
       }
@@ -54,7 +55,7 @@ const FormEditPrincipal = ({ product, onClose, onSave }) => {
   // Función para cargar proveedores
   const fetchProviders = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8000/proveedores");
+      const response = await fetch(`${API_URL}/proveedores`);
       if (!response.ok) {
         throw new Error("Error al cargar proveedores");
       }
@@ -154,7 +155,7 @@ const FormEditPrincipal = ({ product, onClose, onSave }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/products/${product.id}`, {
+      const response = await fetch(`${API_URL}/products/${product.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,6 +180,15 @@ const FormEditPrincipal = ({ product, onClose, onSave }) => {
       alert(`❌ Error al actualizar el producto. ${error.message}`);
     }
   };
+
+  const getImageUrl = useCallback((imagePath) => {
+    if (!imagePath) {
+      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
+    }
+    const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
+    const fullUrl = `${API_URL}/static/${cleanPath}`;
+    return fullUrl;
+  }, []);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

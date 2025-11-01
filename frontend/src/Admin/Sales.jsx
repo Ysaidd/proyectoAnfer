@@ -6,12 +6,13 @@ const Sales = () => {
   const [loading, setLoading] = useState(true); // Nuevo estado para indicar carga
   const [error, setError] = useState(null);   // Nuevo estado para errores
 
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   // Función para cargar las ventas desde la API
   const fetchSales = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:8000/sales");
+      const response = await fetch(`${API_URL}/sales`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -54,7 +55,7 @@ const Sales = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/sales/${saleCode}/status`, {
+      const response = await fetch(`${API_URL}/sales/${saleCode}/status`, {
         method: 'PATCH', // Usamos PATCH según tu backend
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ const Sales = () => {
 
   const generatePDF = async (saleId) => {
     try {
-      const response = await fetch(`http://localhost:8000/orders/orders/${saleId}/pdf`, {
+      const response = await fetch(`${API_URL}/orders/orders/${saleId}/pdf`, {
         method: "GET",
       });
 
@@ -113,7 +114,7 @@ const Sales = () => {
 
       <CreateSale onAddSale={addSale} />
 
-      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+      <div class
         <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">📋 Listado de Ventas</h2>
         {loading && <div className="text-center p-4 text-blue-600">Cargando ventas...</div>}
         {error && <div className="text-center p-4 text-red-600">{error}</div>}

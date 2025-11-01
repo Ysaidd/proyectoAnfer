@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate para la redirección
 
 const RegisterForm = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const navigate = useNavigate(); // Hook para la navegación programática
 
   // Estados para cada campo del formulario
@@ -23,7 +24,7 @@ const RegisterForm = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch('http://localhost:8000/users/register', {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

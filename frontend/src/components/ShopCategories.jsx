@@ -5,6 +5,7 @@ import ProductList from "./ProductList";
 const ITEMS_PER_PAGE = 6;
 
 const StorePage = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -21,8 +22,8 @@ const StorePage = () => {
       try {
         setLoading(true);
         const [productRes, categoryRes] = await Promise.all([
-          fetch("http://localhost:8000/products"),
-          fetch("http://localhost:8000/categorias")
+          fetch(`${API_URL}/products`),
+          fetch(`${API_URL}/categorias`)
         ]);
         
         if (!productRes.ok || !categoryRes.ok) {

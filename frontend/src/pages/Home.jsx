@@ -13,7 +13,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 🔥 Llamar a la API para obtener 3 productos
+   
         fetch(`${API_URL}/products?limit=3`)  // Llamada a la API actualizada
             .then((response) => response.json())
             .then((data) => {

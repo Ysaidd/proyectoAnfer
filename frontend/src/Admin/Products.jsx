@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import ProductForm from "./ProductForm";
 import VariantForm from "./VariantForm";
 import FormEditPrincipal from "./FormEditPrincipal";
+const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -18,7 +19,7 @@ const Products = () => {
   // al ser usada en un useEffect, aunque aquí no debería cambiar
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8000/products");
+      const response = await fetch(`${API_URL}/products`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -33,7 +34,7 @@ const Products = () => {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8000/categorias");
+      const response = await fetch(`${API_URL}/categorias`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -75,7 +76,7 @@ const Products = () => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8000/products/${productId}`, {
+      const response = await fetch(`${API_URL}/products/${productId}`, {
         method: "DELETE",
       });
       if (!response.ok) {
@@ -94,7 +95,7 @@ const Products = () => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8000/products/variants/${variantId}`, {
+      const response = await fetch(`${API_URL}/products/variants/${variantId}`, {
         method: "DELETE",
       });
       if (!response.ok) {
@@ -126,13 +127,10 @@ const Products = () => {
   // Función para construir la URL correcta de la imagen
   const getImageUrl = (imagePath) => {
     if (!imagePath) {
-        // console.log("No imagePath provided, returning null."); // Para depuración
-        return null; // O una imagen de placeholder por defecto
+        return null;
     }
-    // Asegurarse de que la ruta comienza con 'images/' si es lo que devuelve el backend
     const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
-    const fullUrl = `http://localhost:8000/static/${cleanPath}`;
-    // console.log("Constructed image URL:", fullUrl); // Para depuración
+    const fullUrl = `${API_URL}/static/${cleanPath}`;
     return fullUrl;
   };
 

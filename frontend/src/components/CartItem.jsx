@@ -4,6 +4,7 @@ import { Trash2, Plus, Minus } from "lucide-react";
 import { useCart } from "../context/CartContext";
 
 const CartItem = ({ item }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const { removeFromCart, updateQuantity } = useCart();
   const [quantity, setQuantity] = useState(item.quantity);
 
@@ -24,7 +25,7 @@ const CartItem = ({ item }) => {
       return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' font-family='sans-serif' font-size='10' text-anchor='middle' dominant-baseline='middle' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
     }
     const cleanPath = imagePath.startsWith('images/') ? imagePath : `images/${imagePath}`;
-    return `http://localhost:8000/static/${cleanPath}`;
+    return `${API_URL}/static/${cleanPath}`;
   };
 
   return (

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 
 const ProductForm = ({ product, onClose, onSave }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
   const [formData, setFormData] = useState(
     product
       ? {
@@ -39,7 +40,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
 
   useEffect(() => {
     // Cargar categorías desde la API
-    fetch("http://localhost:8000/categorias")
+    fetch(`${API_URL}/categorias`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +61,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
 
   useEffect(() => {
     // Cargar proveedores desde la API
-    fetch("http://localhost:8000/proveedores")
+    fetch(`${API_URL}/proveedores`)
       .then((response) => response.json())
       .then((data) => {
         setProviders(data);
@@ -178,7 +179,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
     formData.append('file', imageFile);
 
     try {
-        const response = await fetch(`http://localhost:8000/products/${productId}/upload-image`, {
+        const response = await fetch(`${API_URL}/products/${productId}/upload-image`, {
             method: 'POST',
             body: formData,
         });
@@ -232,8 +233,8 @@ const ProductForm = ({ product, onClose, onSave }) => {
     let savedProduct = null;
     try {
       const url = product
-        ? `http://localhost:8000/products/${product.id}`
-        : "http://localhost:8000/products";
+        ? `${API_URL}/products/${product.id}`
+        : `${API_URL}/products`;
 
       const method = product ? "PUT" : "POST";
 
@@ -407,7 +408,7 @@ const ProductForm = ({ product, onClose, onSave }) => {
         {product?.image_url && (
             <div className="mb-3">
                 <p className="text-sm text-gray-600">Imagen actual:</p>
-                <img src={`http://localhost:8000/static/${product.image_url}`} alt="Imagen actual" style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover', border: '1px solid #ddd' }} />
+                <img src={`${API_URL}/static/${product.image_url}`} alt="Imagen actual" style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover', border: '1px solid #ddd' }} />
             </div>
         )}
 
