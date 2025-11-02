@@ -220,7 +220,7 @@ const LoginForm = () => {
             <p className="text-gray-600">
               ¿No tienes una cuenta?{' '}
               <Link 
-                href="/register" 
+                to="/register" 
                 className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline transition-colors duration-300"
               >
                 Regístrate aquí
