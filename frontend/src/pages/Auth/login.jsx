@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
@@ -219,12 +219,12 @@ const LoginForm = () => {
           >
             <p className="text-gray-600">
               ¿No tienes una cuenta?{' '}
-              <a 
+              <Link 
                 href="/register" 
                 className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline transition-colors duration-300"
               >
                 Regístrate aquí
-              </a>
+              </Link>
             </p>
           </motion.div>
         </motion.div>
