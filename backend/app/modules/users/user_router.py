@@ -1,6 +1,6 @@
 # app/modules/users/user_router.py
 from fastapi import APIRouter, Depends, status
-from typing import List
+from typing import List, Any
 from app.core.exceptions import DuplicateEntryException
 from fastapi.exceptions import HTTPException
 from app.modules.users import user_schema as schemas
@@ -127,4 +127,47 @@ def delete_user_endpoint(
     """
     user_service.delete_user(user_id)
     return
+
+# Nuevo endpoint para que el usuario autenticado actualice SU propio perfil
+@router.put(
+    "/me/",
+    response_model=schemas.User,
+    dependencies=[Depends(get_current_active_user)],
+    summary="Actualizar perfil propio (usuario autenticado)"
+)
+def update_my_profile(
+    user_data: schemas.UserUpdate,
+    current_user: Any = Depends(get_current_active_user),
+    user_service: UserService = Depends(get_user_service_dependency),
+):
+    """
+    Permite al usuario autenticado actualizar su propio perfil.
+    - No permite cambiar el rol ni campos sensibles desde aquí.
+    """
+    # extraer el id del current_user (soporta dict o objeto)
+    try:
+        if isinstance(current_user, dict):
+            user_id = current_user.get("id")
+        else:
+            user_id = getattr(current_user, "id", None)
+    except Exception:
+        user_id = None
+
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se pudo identificar al usuario autenticado.")
+
+    try:
+        # Si el servicio implementa update_own_profile, úsalo (más seguro).
+        if hasattr(user_service, "update_own_profile"):
+            updated = user_service.update_own_profile(user_id, user_data)
+        else:
+            # Fallback: reusar update_user pero asegurarse de no permitir cambio de rol en el service
+            updated = user_service.update_user(user_id, user_data)
+        return updated
+    except DuplicateEntryException:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Un usuario con ese correo ya existe.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error interno al actualizar perfil: {str(e)}")
 

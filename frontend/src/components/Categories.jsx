@@ -8,28 +8,28 @@ const Categories = () => {
   const categories = [
     {
       title: "Caballero",
-      image: "/images/prueba.jpg",
+      image: "/images/caballeros.jpeg",
       link: "/products/",
       description: "Estilo elegante y moderno",
       icon: "👔"
     },
     {
       title: "Juvenil",
-      image: "/images/prueba.jpg",
+      image: "/images/juvenil.jpg",
       link: "/products/",
       description: "Tendencias frescas",
       icon: "👕"
     },
     {
       title: "Accesorios",
-      image: "/images/prueba.jpg",
+      image: "/images/accesorios.png",
       link: "/products/",
       description: "Detalles que marcan la diferencia",
       icon: "👜"
     },
     {
-      title: "Personalizar",
-      image: "/images/prueba.jpg",
+      title: "Damas",
+      image: "/images/dama.jpeg",
       link: "/products/",
       description: "Crea tu estilo único",
       icon: "🎨"

@@ -40,7 +40,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="py-16 bg-white"
+                className="py-16 bg-white" 
             >
                 <Categories />
             </motion.section>

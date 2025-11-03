@@ -64,6 +64,7 @@ const UserForm = ({ initial, onClose, onSaved }) => {
           <select value={form.role} onChange={(e) => setForm({...form, role: e.target.value})} className="w-full p-2 border rounded">
             <option value="client">client</option>
             <option value="manager">manager</option>
+            <option value="admin">admin</option>
           </select>
 
           <div className="flex justify-between mt-4">

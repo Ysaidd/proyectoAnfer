@@ -1,6 +1,7 @@
 # app/modules/users/user_service.py
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from typing import Any
 
 from app.modules.auth.security import get_password_hash
 from app.modules.users import user_model as models
@@ -69,3 +70,23 @@ class UserService:
             raise ValueError("El rol debe ser de cliente.")
         
         return self.create_user(user_data)
+
+    def update_own_profile(self, user_id: int, user_update: schemas.UserUpdate) -> Any:
+        """
+        Actualización restringida para que un usuario pueda modificar su propio perfil.
+        No permite cambiar el rol ni otros campos sensibles.
+        """
+        data = user_update.dict(exclude_unset=True)
+        data.pop("role", None)
+        # Reconstruir esquema para validar shape
+        safe_update = schemas.UserUpdate(**data)
+        try:
+            # Reusar la lógica existente de actualización
+            updated = self.update_user(user_id, safe_update)
+            return updated
+        except DuplicateEntryException:
+            # Propagar para que el router devuelva 409
+            raise
+        except Exception:
+            # Propagar error para que el router maneje el 500
+            raise

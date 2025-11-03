@@ -3,9 +3,13 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } fro
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import download from "downloadjs";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext"; // <-- nuevo import
 
 const Dashboard = () => {
   const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+  const { userData } = useAuth(); // obtener info del usuario
+  const isAdmin = userData && (userData.role === "admin" || (Array.isArray(userData.roles) && userData.roles.includes("admin")));
+  const [usersCount, setUsersCount] = useState(null); // nuevo estado para conteo de usuarios
   const [ventas, setVentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reportRange, setReportRange] = useState("month");
@@ -19,6 +23,25 @@ const Dashboard = () => {
       Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`
     }
   });
+
+  // Obtener conteo de usuarios (solo si es admin en cliente)
+  useEffect(() => {
+    if (!isAdmin) return;
+    let mounted = true;
+    const fetchUsersCount = async () => {
+      try {
+        const { data } = await api.get("/users/");
+        if (mounted) {
+          setUsersCount(Array.isArray(data) ? data.length : (data.count ?? null));
+        }
+      } catch (err) {
+        console.error("No se pudo cargar conteo de usuarios:", err.response?.data || err.message);
+        if (mounted) setUsersCount(null);
+      }
+    };
+    fetchUsersCount();
+    return () => { mounted = false; };
+  }, [isAdmin]); // dependencia: isAdmin
 
   // Lógica original para obtener los datos, sin modificaciones
   useEffect(() => {
@@ -197,6 +220,17 @@ const Dashboard = () => {
                 </div>
               </div>
             ))}
+
+            {/* Tarjeta visible solo para administradores */}
+            {isAdmin && (
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center space-x-4">
+                <div className="text-3xl bg-green-100 p-3 rounded-full">👥</div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{usersCount !== null ? usersCount : '—'}</p>
+                  <p className="text-sm text-gray-500">Usuarios (Total)</p>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

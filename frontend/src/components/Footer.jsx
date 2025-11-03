@@ -161,7 +161,7 @@ const Footer = () => {
                   transition={{ duration: 0.2 }}
                 >
                   <FaPhone className="text-indigo-400 text-lg" />
-                  <a href="tel:+584247347724" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  <a href="https://wa.me/584247347724" className="text-gray-300 hover:text-white transition-colors duration-300">
                     +58 4247347724
                   </a>
                 </motion.div>
@@ -188,21 +188,26 @@ const Footer = () => {
               </div>
 
               {/* WhatsApp CTA */}
-              <motion.div 
-                className="mt-6"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <br />
+
                 <a
                   href="https://wa.me/584247347724"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Abrir WhatsApp en nueva pestaña"
+                  onClick={(e) => {
+                    // Fallback: abrir con window.open si el navegador o algún handler previene la navegación por defecto
+                    if (e && e.preventDefault) {
+                      e.preventDefault();
+                    }
+                    window.open("https://wa.me/584247347724", "_blank", "noopener,noreferrer");
+                  }}
                   className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-300"
                 >
                   <FaWhatsapp className="text-lg" />
                   <span className="font-semibold">WhatsApp</span>
                 </a>
-              </motion.div>
+
             </motion.div>
           </div>
         </motion.div>
