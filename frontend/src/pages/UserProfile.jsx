@@ -27,7 +27,6 @@ const UserProfile = () => {
   const [profileForm, setProfileForm] = useState({
     full_name: "",
     email: "",
-    direccion: "",
     password: "",
     confirm_password: ""
   });
@@ -42,7 +41,6 @@ const UserProfile = () => {
       setProfileForm({
         full_name: cliente.full_name || cliente.name || "",
         email: cliente.email || "",
-        direccion: cliente.direccion || cliente.address || "",
         password: "",
         confirm_password: ""
       });
@@ -60,7 +58,6 @@ const UserProfile = () => {
       setProfileForm({
         full_name: userData.full_name || userData.name || "",
         email: userData.email || "",
-        direccion: userData.direccion || userData.address || ""
       });
     }
     setEditOpen(true);
@@ -88,35 +85,51 @@ const UserProfile = () => {
 
     try {
       const token = localStorage.getItem("access_token");
+      // Determinar id del usuario a actualizar (cliente obtenido por ventas o userData)
+      const id = cliente?.id || userData?.id;
+      if (!id) {
+        alert("No se encontró el identificador del usuario (user_id). No se puede actualizar sin él.");
+        return;
+      }
       const payload = {
+        user_id: id, // requerido por el nuevo endpoint sin token
         full_name: profileForm.full_name,
         email: profileForm.email
       };
-      if (profileForm.direccion) payload.direccion = profileForm.direccion;
       if (profileForm.password) payload.password = profileForm.password;
 
       const res = await fetch(`${API_URL}/users/me/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          // no enviamos token según lo solicitado
         },
         body: JSON.stringify(payload)
       });
 
-      // manejar situaciones específicas de respuesta
-      if (res.status === 403) {
-        // el backend denegó por permisos (aunque ahora debería permitirse)
-        const errBody = await res.json().catch(() => null);
-        const detail = errBody?.detail || "No tienes permisos para actualizar este perfil.";
-        alert(detail);
-        return;
+      // intentar leer body (si hay) y construir mensaje legible en caso de error
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        // body no es JSON o está vacío
+        data = null;
       }
-
-      const data = await (res.ok ? res.json() : res.json().catch(() => null));
+      
       if (!res.ok) {
-        const detail = data?.detail || data || `HTTP ${res.status}`;
-        throw new Error(detail);
+        // Determinar mensaje legible
+        const detail =
+          (data && (typeof data === "object") && (data.detail || data.message || data.error)) ||
+          (data && typeof data === "string" ? data : null) ||
+          `HTTP ${res.status}`;
+
+        // Log para depuración
+        console.error("[UserProfile] update profile failed:", { status: res.status, body: data });
+
+        // Mostrar mensaje al usuario (si es objeto, stringify pero sin llenar la alerta con demasiada info)
+        const userMessage = typeof detail === "string" ? detail : JSON.stringify(detail);
+        alert(userMessage);
+        return;
       }
 
       // Actualizar UI local y localStorage si corresponde
@@ -135,7 +148,7 @@ const UserProfile = () => {
       alert("Perfil actualizado correctamente.");
       setEditOpen(false);
     } catch (err) {
-      console.error("Error actualizando perfil:", err);
+      console.error("Error actualizando perfil (unexpected):", err);
       alert("No se pudo actualizar el perfil: " + (err.message || "error desconocido"));
     }
   };
@@ -546,9 +559,6 @@ const UserProfile = () => {
  
               <label className="block text-sm">Correo</label>
               <input name="email" type="email" value={profileForm.email} onChange={handleProfileChange} className="w-full p-2 border rounded" required />
- 
-              <label className="block text-sm">Dirección</label>
-              <input name="direccion" value={profileForm.direccion} onChange={handleProfileChange} className="w-full p-2 border rounded" />
  
               <label className="block text-sm">Nueva contraseña (opcional)</label>
               <input name="password" type="password" value={profileForm.password} onChange={handleProfileChange} className="w-full p-2 border rounded" />

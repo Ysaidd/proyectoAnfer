@@ -46,7 +46,27 @@ const LoginForm = () => {
       const data = await response.json();
       console.log('Inicio de sesión exitoso - Datos recibidos:', data);
 
-      await login(data.access_token);
+      // Asegurar que el token se almacene para las llamadas que leen localStorage directamente
+      const token = data.access_token || data.token || data.accessToken;
+      if (token) {
+        try {
+          localStorage.setItem("access_token", String(token));
+        } catch (e) {
+          console.warn("No se pudo guardar access_token en localStorage:", e);
+        }
+      }
+
+      // Guardar userData si el backend la devuelve (opcional)
+      if (data.user) {
+        try {
+          localStorage.setItem("userData", JSON.stringify(data.user));
+        } catch (e) {
+          console.warn("No se pudo guardar userData en localStorage:", e);
+        }
+      }
+
+      // Llamar al contexto (si aplica) para que actualice estado de auth
+      await login(token || data.access_token);
       
       setSuccess('¡Inicio de sesión exitoso! Redirigiendo...');
       
