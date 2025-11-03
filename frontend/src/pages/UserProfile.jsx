@@ -99,7 +99,7 @@ const UserProfile = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          ...(token ? { Authorization: `Bearer ${token}` } : {}) //
         },
         body: JSON.stringify(payload)
       });
