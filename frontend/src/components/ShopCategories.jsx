@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductList from "./ProductList";
-import { useLocation } from "react-router-dom"; // <-- import useLocation
+import { useLocation } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 6;
 
 const StorePage = () => {
-  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
-  const location = useLocation(); // <-- obtener location
+  const API_URL = import.meta.env.VITE_API_URL;
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [selectedCategory, setSelectedCategory] = useState(null); 
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,59 +27,79 @@ const StorePage = () => {
           fetch(`${API_URL}/products`),
           fetch(`${API_URL}/categorias`)
         ]);
-        
+
         if (!productRes.ok || !categoryRes.ok) {
           throw new Error('Error al cargar los datos');
         }
-        
+
         const [productData, categoryData] = await Promise.all([
           productRes.json(),
           categoryRes.json()
         ]);
-        
-        setProducts(productData);
-        setFilteredProducts(productData);
-        setCategories(categoryData);
+
+        setProducts(productData || []);
+        setFilteredProducts(productData || []);
+        setCategories(categoryData || []);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || String(err));
         console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [API_URL]);
 
-  // Aplicar categoría desde query param cuando cambien categories o location.search
+  // Aplicar categoría desde query param o desde location.state cuando cambien categories o location
   useEffect(() => {
     if (!categories || categories.length === 0) return;
-    const urlCategory = new URLSearchParams(location.search).get("category");
-    if (urlCategory) {
-      const decoded = decodeURIComponent(urlCategory).toLowerCase();
-      const matched = categories.find(c => (c.name || "").toLowerCase() === decoded);
-      if (matched) {
-        setSelectedCategories([matched]);
-        setSelectedCategory(matched); // marcar como seleccionada en UI si aplica
-        return;
-      }
+
+    // preferir query param, si no existe usar location.state
+    let rawCategory = new URLSearchParams(location.search).get("category");
+    if (!rawCategory && location.state && (location.state.category || location.state.categoryName)) {
+      rawCategory = location.state.category || location.state.categoryName;
     }
-    // Si no hay param o no se encontró, no seleccionar nada por defecto
-  }, [location.search, categories]);
+    if (!rawCategory) return;
+
+    const decoded = decodeURIComponent(rawCategory);
+    const normalize = (s) => (s ? String(s).trim().toLowerCase() : "");
+    const target = normalize(decoded);
+
+    // Buscar match robusto en varios campos posibles
+    const matched = categories.find((c) => {
+      const candidates = [
+        c.name,
+        c.nombre,
+        c.title,
+        c.slug,
+        c.id ? String(c.id) : null
+      ].filter(Boolean);
+      return candidates.some(val => normalize(val) === target);
+    });
+
+    if (matched) {
+      setSelectedCategories([matched]);
+      setSelectedCategory(matched);
+    }
+  }, [location.search, location.state, categories]);
 
   useEffect(() => {
     let filtered = products;
-  
+
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((p) => {
-        // Verificar si el producto tiene alguna de las categorías seleccionadas
+        // Si producto tiene arreglo p.categorias (objetos)
         if (p.categorias && Array.isArray(p.categorias)) {
-          return p.categorias.some(productCategory => 
-            selectedCategories.some(selectedCat => selectedCat.name === productCategory.name)
+          return p.categorias.some(productCategory =>
+            selectedCategories.some(selectedCat =>
+              // comparar por name/nombre/slug/id
+              (productCategory.name || productCategory.nombre || String(productCategory.id || "")).toString() === (selectedCat.name || selectedCat.nombre || String(selectedCat.id || ""))
+            )
           );
         }
-        
-        // Fallback para estructura antigua (compatibilidad)
+
+        // Fallbacks para distintas estructuras
         let productCategory = null;
         if (typeof p.category === "string") {
           productCategory = p.category;
@@ -88,27 +108,35 @@ const StorePage = () => {
         } else if (p.categoria) {
           productCategory = typeof p.categoria === "string" ? p.categoria : p.categoria.name;
         }
-        
-        return selectedCategories.some(selectedCat => selectedCat.name === productCategory);
+
+        if (productCategory == null) return false;
+
+        return selectedCategories.some(selectedCat => {
+          const selName = selectedCat.name || selectedCat.nombre || String(selectedCat.id || "");
+          return String(productCategory) === String(selName);
+        });
       });
     }
-  
+
     if (searchTerm) {
       filtered = filtered.filter((p) =>
-        p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.nombre || "").toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-  
+
     setFilteredProducts(filtered);
     setCurrentPage(1);
   }, [products, selectedCategories, searchTerm]);
-  
+
   const handleCategoryToggle = (category) => {
     setSelectedCategories(prev => {
-      const isSelected = prev.some(cat => cat.name === category.name);
+      const isSelected = prev.some(cat => String(cat.id) === String(category.id) || (cat.name && category.name && cat.name === category.name));
       if (isSelected) {
-        return prev.filter(cat => cat.name !== category.name);
+        const next = prev.filter(cat => !(String(cat.id) === String(category.id) || (cat.name && category.name && cat.name === category.name)));
+        setSelectedCategory(next.length === 1 ? next[0] : null);
+        return next;
       } else {
+        setSelectedCategory(category);
         return [...prev, category];
       }
     });
@@ -116,15 +144,13 @@ const StorePage = () => {
 
   const clearAllFilters = () => {
     setSelectedCategories([]);
+    setSelectedCategory(null);
     setSearchTerm("");
   };
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((filteredProducts.length || 0) / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProducts = filteredProducts.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
+  const paginatedProducts = (filteredProducts || []).slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -169,7 +195,7 @@ const StorePage = () => {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="max-w-7xl mx-auto"
       variants={containerVariants}
       initial="hidden"
@@ -177,10 +203,7 @@ const StorePage = () => {
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar - Categories */}
-        <motion.aside 
-          variants={itemVariants}
-          className="lg:col-span-1"
-        >
+        <motion.aside variants={itemVariants} className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
             <h2 className="text-2xl font-bold mb-6 flex items-center">
               <span className="text-2xl mr-2">🏷️</span>
@@ -188,9 +211,9 @@ const StorePage = () => {
             </h2>
             <div className="space-y-2">
               <motion.button
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => { setSelectedCategory(null); setSelectedCategories([]); }}
                 className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 ${
-                  selectedCategory === null
+                  selectedCategory === null && selectedCategories.length === 0
                     ? 'bg-indigo-100 text-indigo-600 font-semibold'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
@@ -204,15 +227,17 @@ const StorePage = () => {
                   </span>
                 </span>
               </motion.button>
-              
+
               {categories.map((cat, index) => {
-                // Contar productos en esta categoría
+                const displayName = cat.name || cat.nombre || cat.title || String(cat.id);
                 const categoryCount = products.filter(p => {
                   if (p.categorias && Array.isArray(p.categorias)) {
-                    return p.categorias.some(productCategory => productCategory.name === cat.name);
+                    return p.categorias.some(productCategory => {
+                      const pcName = productCategory.name || productCategory.nombre || String(productCategory.id || "");
+                      return String(pcName) === String(displayName);
+                    });
                   }
-                  
-                  // Fallback para estructura antigua
+
                   let productCategory = null;
                   if (typeof p.category === "string") {
                     productCategory = p.category;
@@ -221,14 +246,14 @@ const StorePage = () => {
                   } else if (p.categoria) {
                     productCategory = typeof p.categoria === "string" ? p.categoria : p.categoria.name;
                   }
-                  return productCategory === cat.name;
+                  return String(productCategory) === String(displayName);
                 }).length;
 
-                const isSelected = selectedCategories.some(selectedCat => selectedCat.name === cat.name);
+                const isSelected = selectedCategories.some(selectedCat => String(selectedCat.id) === String(cat.id) || (selectedCat.name && cat.name && selectedCat.name === cat.name));
 
                 return (
                   <motion.button
-                    key={cat.name}
+                    key={cat.id ?? `${cat.name}-${index}`}
                     onClick={() => handleCategoryToggle(cat)}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 ${
                       isSelected
@@ -236,14 +261,12 @@ const StorePage = () => {
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                     whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                    transition={{ duration: 0.2, delay: index * 0.03 }}
                   >
                     <span className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
-                        {isSelected && (
-                          <span className="text-indigo-600">✓</span>
-                        )}
-                        {cat.name}
+                        {isSelected && <span className="text-indigo-600">✓</span>}
+                        {displayName}
                       </span>
                       <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full text-xs">
                         {categoryCount}
@@ -257,10 +280,7 @@ const StorePage = () => {
         </motion.aside>
 
         {/* Main Content */}
-        <motion.main 
-          variants={itemVariants}
-          className="lg:col-span-3"
-        >
+        <motion.main variants={itemVariants} className="lg:col-span-3">
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -278,7 +298,7 @@ const StorePage = () => {
                   </svg>
                 </div>
               </div>
-              
+
               <motion.button
                 onClick={clearAllFilters}
                 className="px-6 py-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium"
@@ -298,11 +318,11 @@ const StorePage = () => {
               {selectedCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {selectedCategories.map((category) => (
-                    <span 
-                      key={category.name}
+                    <span
+                      key={category.id ?? category.name}
                       className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium"
                     >
-                      {category.name}
+                      {category.name || category.nombre || category.title || String(category.id)}
                     </span>
                   ))}
                 </div>
@@ -313,7 +333,7 @@ const StorePage = () => {
           {/* Products Grid */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={`${selectedCategories.map(c => c.name).join(',')}-${searchTerm}-${currentPage}`}
+              key={`${selectedCategories.map(c => c.id || c.name).join(',')}-${searchTerm}-${currentPage}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -325,25 +345,23 @@ const StorePage = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <motion.div 
+            <motion.div
               className="bg-white rounded-2xl shadow-lg p-6 mt-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <div className="flex flex-col items-center space-y-4">
-                {/* Pagination Info */}
                 <div className="text-center">
                   <p className="text-gray-600 text-sm">
                     Página {currentPage} de {totalPages} • {filteredProducts.length} productos total
                   </p>
                 </div>
-                
-                {/* Pagination Controls */}
+
                 <div className="flex justify-center items-center space-x-2">
                   <motion.button
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(currentPage - 1)}
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
                       currentPage === 1
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -357,7 +375,7 @@ const StorePage = () => {
                     </svg>
                     <span>Anterior</span>
                   </motion.button>
-                  
+
                   {/* Page Numbers */}
                   <div className="flex space-x-1">
                     {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
@@ -371,7 +389,9 @@ const StorePage = () => {
                       } else {
                         pageNum = currentPage - 3 + i;
                       }
-                      
+
+                      if (pageNum < 1 || pageNum > totalPages) return null;
+
                       return (
                         <motion.button
                           key={pageNum}
@@ -390,10 +410,10 @@ const StorePage = () => {
                       );
                     })}
                   </div>
-                  
+
                   <motion.button
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
                       currentPage === totalPages
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'

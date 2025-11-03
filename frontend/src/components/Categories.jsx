@@ -93,9 +93,10 @@ const Categories = () => {
             whileHover={{ y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Wrap CategoryCard with Link passing category as query param */}
+            {/* Wrap CategoryCard with Link passing category both as query param and in location.state */}
             <Link
               to={`/products?category=${encodeURIComponent(cat.title)}`}
+              state={{ category: cat.title }} // <-- fallback via location.state
               className="block"
             >
               <CategoryCard {...cat} />
