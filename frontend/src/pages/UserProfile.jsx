@@ -28,7 +28,7 @@ const handleGeneratePDF = (venta) => {
 
 
 // --- Componente Principal de la Página de Perfil ---
-const ProfilePage = ({ cliente, ventas, onProfileUpdate }) => {
+const ProfilePage = ({ cliente, ventas  = [], onProfileUpdate }) => {
   const [editOpen, setEditOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     full_name: '',
