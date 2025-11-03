@@ -13,19 +13,19 @@ const fetchCarouselData = async () => {
 
 const images = [
   {
-    src: "/images/primeraImg.jpg",
+    src: "/images/primeraImg.jpeg",
     title: "Nueva Colección",
     subtitle: "Descubre las últimas tendencias",
     cta: "Explorar Ahora"
   },
   {
-    src: "/images/segundaImg.jpg", 
+    src: "/images/segundaImg.jpeg", 
     title: "Ofertas Especiales",
     subtitle: "Hasta 50% de descuento",
     cta: "Ver Ofertas"
   },
   {
-    src: "/images/terceraImg.jpg",
+    src: "/images/terceraImg.jpeg",
     title: "Estilo Único",
     subtitle: "Para cada ocasión",
     cta: "Descubrir"
