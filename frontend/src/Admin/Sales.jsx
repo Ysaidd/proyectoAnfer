@@ -1,13 +1,18 @@
+// Archivo: Sales.jsx
+
 import { useState, useEffect } from "react";
 import CreateSale from "./CreateSale";
+// --- ¡NUEVO! Importar las bibliotecas para generar PDF ---
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // <-- CAMBIO AQUÍ: Importamos la función
 
 const Sales = () => {
   const [sales, setSales] = useState([]);
-  const [loading, setLoading] = useState(true); // Nuevo estado para indicar carga
-  const [error, setError] = useState(null);   // Nuevo estado para errores
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
-  // Función para cargar las ventas desde la API
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const fetchSales = async () => {
     setLoading(true);
     setError(null);
@@ -26,53 +31,41 @@ const Sales = () => {
     }
   };
 
-  // Cargar ventas al montar el componente (y cada vez que se necesite refrescar)
   useEffect(() => {
     fetchSales();
-  }, []); // El array vacío significa que se ejecuta solo una vez al montar
+  }, []);
 
-  const addSale = (newSale) => {
-    // Al añadir una nueva venta, la agregamos al estado y luego refrescamos la lista completa
-    // para asegurarnos de que todo esté sincronizado (incluyendo IDs generados por backend, etc.)
-    // Opcionalmente, podrías solo agregar newSale al estado y hacer un fetch más tarde si el ID es crucial.
-    // Para simplificar, haremos un fetch completo aquí para asegurar la consistencia.
+  const addSale = () => {
     fetchSales();
   };
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
-    // Asegurarse de que la fecha sea válida antes de formatear
     if (isNaN(date.getTime())) {
       return "Fecha inválida";
     }
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) + " " + date.toLocaleTimeString('es-ES');
   };
 
-  // Función para actualizar el estado de una venta (CONFIRMAR/CANCELAR)
   const handleUpdateSaleStatus = async (saleCode, newStatus) => {
     if (!window.confirm(`¿Estás seguro de que deseas ${newStatus} la venta con código ${saleCode}?`)) {
-      return; // El usuario canceló
+      return;
     }
 
     try {
       const response = await fetch(`${API_URL}/sales/${saleCode}/status`, {
-        method: 'PATCH', // Usamos PATCH según tu backend
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: newStatus }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        // Mostrar el mensaje de error que viene del backend
         throw new Error(errorData.detail || `Error al actualizar la venta: ${response.status}`);
       }
-
-      // Si la actualización fue exitosa, volvemos a cargar las ventas
-      // para que la UI se actualice con el nuevo estado
+      
       alert(`✅ Venta ${saleCode} actualizada a '${newStatus}' correctamente.`);
-      fetchSales(); // Vuelve a cargar todas las ventas para reflejar el cambio
+      fetchSales();
 
     } catch (err) {
       console.error(`Error al actualizar la venta ${saleCode} a ${newStatus}:`, err);
@@ -80,31 +73,57 @@ const Sales = () => {
     }
   };
 
-  const generatePDF = async (saleId) => {
-    try {
-      const response = await fetch(`${API_URL}/orders/orders/${saleId}/pdf`, {
-        method: "GET",
-      });
+  // --- ¡FUNCIÓN generatePDF ACTUALIZADA! ---
+  // Ahora recibe el objeto 'sale' completo en lugar del 'saleId'
+  const generatePDF = (sale) => {
+    // 1. Crear una nueva instancia de jsPDF
+    const doc = new jsPDF();
 
-      if (!response.ok) {
-          const errorText = await response.text(); // Leer el cuerpo de la respuesta de error
-          throw new Error(`Error al generar PDF: ${response.status} - ${errorText}`);
-      }
+    // 2. Definir el contenido del PDF
+    // Título
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Recibo de Venta: #${sale.codigo}`, 14, 22);
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `venta_${saleId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      alert("PDF generado y descargado con éxito.");
-    } catch (error) {
-      console.error("Error descargando PDF:", error);
-      alert(`❌ Error descargando PDF: ${error.message}`);
-    }
+    // Información general de la venta
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Cliente ID: ${sale.cliente_id}`, 14, 35);
+    doc.text(`Fecha: ${formatDate(sale.fecha_creacion)}`, 14, 42);
+    doc.text(`Estado: ${sale.estado.charAt(0).toUpperCase() + sale.estado.slice(1)}`, 14, 49);
+
+    // 3. Preparar los datos para la tabla de productos
+    const tableColumn = ["Producto (Variante ID)", "Cantidad", "Precio Unitario", "Subtotal"];
+    const tableRows = [];
+
+    sale.detalles.forEach(item => {
+      const subtotal = (item.cantidad * (item.precio_unitario || 0)).toFixed(2);
+      const itemData = [
+        item.variante_id,
+        item.cantidad,
+        `$${(item.precio_unitario || 0).toFixed(2)}`,
+        `$${subtotal}`
+      ];
+      tableRows.push(itemData);
+    });
+
+    // 4. Añadir la tabla al documento usando autoTable
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 60, // Posición vertical donde empieza la tabla
+      theme: 'grid',
+      headStyles: { fillColor: [22, 160, 133] }, // Color del encabezado (opcional)
+    });
+
+    // 5. Añadir el total al final
+    const finalY = doc.lastAutoTable.finalY; // Obtenemos la posición final de la tabla
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total: $${(sale.total || 0).toFixed(2)}`, 14, finalY + 15);
+
+    // 6. Guardar el PDF con un nombre de archivo dinámico
+    doc.save(`venta_${sale.codigo}.pdf`);
   };
 
   return (
@@ -123,10 +142,11 @@ const Sales = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border border-gray-200">
+              {/* ... Thead sin cambios ... */}
               <thead>
                 <tr className="bg-gray-100 text-left text-gray-600 uppercase text-sm leading-normal">
                   <th className="py-3 px-6 border-b border-gray-200">Venta #</th>
-                  <th className="py-3 px-6 border-b border-gray-200">Cliente CD</th>
+                  <th className="py-3 px-6 border-b border-gray-200">Cliente ID</th>
                   <th className="py-3 px-6 border-b border-gray-200">Fecha</th>
                   <th className="py-3 px-6 border-b border-gray-200">Estado</th>
                   <th className="py-3 px-6 border-b border-gray-200">Código</th>
@@ -196,8 +216,9 @@ const Sales = () => {
                       )}
                     </td>
                     <td className="py-3 px-6 text-center">
+                      {/* --- ¡CAMBIO IMPORTANTE! Pasamos el objeto 'sale' completo --- */}
                         <button
-                            onClick={() => generatePDF(sale.id)}
+                            onClick={() => generatePDF(sale)}
                             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs"
                             title="Descargar PDF de la Venta"
                         >
