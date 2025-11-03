@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import CategoryCard from "./CategoryCard";
+import { Link } from "react-router-dom"; // <-- import Link
 
 const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
 
@@ -50,7 +51,7 @@ const Categories = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
+      transition: { 
         duration: 0.6,
         ease: "easeOut"
       }
@@ -92,7 +93,13 @@ const Categories = () => {
             whileHover={{ y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            <CategoryCard {...cat} />
+            {/* Wrap CategoryCard with Link passing category as query param */}
+            <Link
+              to={`/products?category=${encodeURIComponent(cat.title)}`}
+              className="block"
+            >
+              <CategoryCard {...cat} />
+            </Link>
           </motion.div>
         ))}
       </motion.div>

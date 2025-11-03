@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductList from "./ProductList";
+import { useLocation } from "react-router-dom"; // <-- import useLocation
 
 const ITEMS_PER_PAGE = 6;
 
 const StorePage = () => {
   const API_URL = import.meta.env.VITE_API_URL; // Nueva constante para la URL de la API
+  const location = useLocation(); // <-- obtener location
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -48,6 +50,22 @@ const StorePage = () => {
     };
     fetchData();
   }, []);
+
+  // Aplicar categoría desde query param cuando cambien categories o location.search
+  useEffect(() => {
+    if (!categories || categories.length === 0) return;
+    const urlCategory = new URLSearchParams(location.search).get("category");
+    if (urlCategory) {
+      const decoded = decodeURIComponent(urlCategory).toLowerCase();
+      const matched = categories.find(c => (c.name || "").toLowerCase() === decoded);
+      if (matched) {
+        setSelectedCategories([matched]);
+        setSelectedCategory(matched); // marcar como seleccionada en UI si aplica
+        return;
+      }
+    }
+    // Si no hay param o no se encontró, no seleccionar nada por defecto
+  }, [location.search, categories]);
 
   useEffect(() => {
     let filtered = products;
